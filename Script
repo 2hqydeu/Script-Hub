@@ -240,7 +240,7 @@ local function PlaySwoosh() SwooshSound:Play() end
 local ThemeObjects = { Backgrounds = {}, Texts = {}, Accents = {}, AccentBackgrounds = {}, StateTexts = {} }
 
 ThemeObjects.ApplyMainGradient = function(intensity)
-	intensity = math.clamp(intensity or 0.5, 0, 0.5)
+	intensity = math.clamp(intensity or 0.65, 0, 1)
 	local bgColor = FrameThemeColor
 	MainTextureGradient.Color = ColorSequence.new({
 		ColorSequenceKeypoint.new(0, bgColor:Lerp(Color3.new(0, 0, 0), 0.08)),
@@ -319,7 +319,7 @@ local function UpdateTheme(instant)
 	
 	TweenService:Create(MainFrame, tweenInfo, {BackgroundColor3 = bgColor}):Play()
 	if SplashFrame and SplashFrame.Parent then SplashFrame.BackgroundColor3 = bgColor end
-	ThemeObjects.ApplyMainGradient(0.5)
+	ThemeObjects.ApplyMainGradient(0.65)
 	MainTextureStroke.Color = AccentColor
 	if ThemeObjects.TabScroll and ThemeObjects.TabScroll.Parent then ThemeObjects.TabScroll.ScrollBarImageColor3 = AccentColor end
 	for _, line in ipairs(MainPatternLines) do
@@ -453,9 +453,8 @@ Connections.GradientPulse = RunService.Heartbeat:Connect(function(deltaTime)
 	if ThemeObjects.GradientPulseAccumulator < 0.05 then return end
 	ThemeObjects.GradientPulseAccumulator = 0
 	if type(ThemeObjects.ApplyMainGradient) == "function" then
-		local pulse = (math.sin(ThemeObjects.GradientPulseTime * 1.15) + 1) / 2
-		local pulseIntensity = 0.35 + (pulse * 0.15)
-		pcall(ThemeObjects.ApplyMainGradient, pulseIntensity)
+		local breath = (math.sin(ThemeObjects.GradientPulseTime * 1.55 - math.pi * 0.5) + 1) * 0.5
+		pcall(ThemeObjects.ApplyMainGradient, 0.65 + breath * 0.35)
 	end
 end)
 ThemeObjects.FreeCam = {Enabled = false, Keybind = LoadKeybind("FreeCam"), Binding = false}
