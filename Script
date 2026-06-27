@@ -335,7 +335,7 @@ local function UpdateTheme(instant)
 			end
 		local target = (obj:IsA("TextButton") or obj:IsA("TextBox") or obj.Name == "TabScroll" or obj.Name == "TargetRow") and secBgColor or bgColor
 			if obj:IsA("TextButton") and obj.Text == "On" then target = AccentColor end
-			if obj.Name == "PlayerTPFrame" then target = Color3.fromRGB(14, 18, 26)
+			if obj.Name == "PlayerTPFrame" then target = Color3.fromRGB(14, 18, 26) end
 			if obj.Name == "DestroyBtn" then target = Color3.fromRGB(125, 35, 40)
 			elseif obj.Name == "ResetCharacterBtn" then target = Color3.fromRGB(125, 88, 18)
 			elseif obj.Name == "RejoinBtn" then target = Color3.fromRGB(30, 135, 155)
@@ -5979,36 +5979,47 @@ MainFrame.InputBegan:Connect(function(input) if (input.UserInputType == Enum.Use
 UserInputService.InputChanged:Connect(function(input) if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then local delta = input.Position - dragStart MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
 
 -- FLY-IN TITLE SEQUENCE
-task.spawn(function()
-	SplashFrame.Rotation = -540
-	local spinIn = TweenService:Create(SplashFrame, TweenInfo.new(0.55, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-		Size = UDim2.new(0, 200, 0, 200),
-		Position = UDim2.new(0.5, 0, 0.5, 0),
-		Rotation = 0,
-	})
-	spinIn:Play()
-	spinIn.Completed:Wait()
-
-	local revealTitle = TweenService:Create(SplashText, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-		TextTransparency = 0,
-		TextStrokeTransparency = 0.5,
-	})
-	revealTitle:Play()
-	revealTitle.Completed:Wait()
-	task.wait(0.5)
-
-	local splashStroke = SplashFrame:FindFirstChildOfClass("UIStroke")
-	if splashStroke then
-		TweenService:Create(splashStroke, TweenInfo.new(0.4), {Transparency = 1}):Play()
+-- Safety fallback: always show the main frame after 3 seconds even if the splash hangs
+task.delay(3, function()
+	if not MainFrame.Visible then
+		pcall(function() SplashFrame:Destroy() end)
+		MainFrame.Visible = true
 	end
-	TweenService:Create(SplashText, TweenInfo.new(0.25), {TextTransparency = 1, TextStrokeTransparency = 1}):Play()
-	local spinOut = TweenService:Create(SplashFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
-		Size = UDim2.new(0, 0, 0, 0),
-		Rotation = 540,
-		BackgroundTransparency = 1,
-	})
-	spinOut:Play()
-	spinOut.Completed:Wait()
-	SplashFrame:Destroy()
+end)
+
+task.spawn(function()
+	local ok, err = pcall(function()
+		SplashFrame.Rotation = -540
+		local spinIn = TweenService:Create(SplashFrame, TweenInfo.new(0.55, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+			Size = UDim2.new(0, 200, 0, 200),
+			Position = UDim2.new(0.5, 0, 0.5, 0),
+			Rotation = 0,
+		})
+		spinIn:Play()
+		spinIn.Completed:Wait()
+
+		local revealTitle = TweenService:Create(SplashText, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			TextTransparency = 0,
+			TextStrokeTransparency = 0.5,
+		})
+		revealTitle:Play()
+		revealTitle.Completed:Wait()
+		task.wait(0.5)
+
+		local splashStroke = SplashFrame:FindFirstChildOfClass("UIStroke")
+		if splashStroke then
+			TweenService:Create(splashStroke, TweenInfo.new(0.4), {Transparency = 1}):Play()
+		end
+		TweenService:Create(SplashText, TweenInfo.new(0.25), {TextTransparency = 1, TextStrokeTransparency = 1}):Play()
+		local spinOut = TweenService:Create(SplashFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+			Size = UDim2.new(0, 0, 0, 0),
+			Rotation = 540,
+			BackgroundTransparency = 1,
+		})
+		spinOut:Play()
+		spinOut.Completed:Wait()
+	end)
+	-- Whether the splash succeeded or errored, always clean up and show the GUI
+	pcall(function() SplashFrame:Destroy() end)
 	MainFrame.Visible = true
 end)
