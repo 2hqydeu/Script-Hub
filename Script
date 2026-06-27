@@ -334,8 +334,9 @@ local function UpdateTheme(instant)
 				obj.BackgroundTransparency = keepSolid and 0 or 0.8
 			end
 		local target = (obj:IsA("TextButton") or obj:IsA("TextBox") or obj.Name == "TabScroll" or obj.Name == "TargetRow") and secBgColor or bgColor
-			if obj:IsA("TextButton") and obj.Text == "On" then target = AccentColor end
 			if obj.Name == "PlayerTPFrame" then target = Color3.fromRGB(14, 18, 26)
+			end
+			if obj:IsA("TextButton") and obj.Text == "On" then target = AccentColor end
 			if obj.Name == "DestroyBtn" then target = Color3.fromRGB(125, 35, 40)
 			elseif obj.Name == "ResetCharacterBtn" then target = Color3.fromRGB(125, 88, 18)
 			elseif obj.Name == "RejoinBtn" then target = Color3.fromRGB(30, 135, 155)
@@ -452,7 +453,9 @@ Connections.GradientPulse = RunService.Heartbeat:Connect(function(deltaTime)
 	if ThemeObjects.GradientPulseAccumulator < 0.05 then return end
 	ThemeObjects.GradientPulseAccumulator = 0
 	if type(ThemeObjects.ApplyMainGradient) == "function" then
-		pcall(ThemeObjects.ApplyMainGradient, 0.5)
+		local pulse = (math.sin(ThemeObjects.GradientPulseTime * 1.15) + 1) / 2
+		local pulseIntensity = 0.35 + (pulse * 0.15)
+		pcall(ThemeObjects.ApplyMainGradient, pulseIntensity)
 	end
 end)
 ThemeObjects.FreeCam = {Enabled = false, Keybind = LoadKeybind("FreeCam"), Binding = false}
@@ -2854,6 +2857,7 @@ UserInputService.InputChanged:Connect(function(input)
 	end
 end)
 
+
 FlingBindBtn.MouseButton1Click:Connect(function()
 	PlayClick()
 	IsBindingFlingMenu = true
@@ -2994,6 +2998,7 @@ ThemeObjects.PlayerTP.BindButton.MouseButton1Click:Connect(function()
 		end
 	end)
 end)
+
 
 local PlayerScroll = Instance.new("ScrollingFrame")
 PlayerScroll.Name = "PlayerScroll"
@@ -3370,6 +3375,7 @@ ThemeObjects.PlayerTP.RefreshWaypoints = function()
 	end
 	ThemeObjects.PlayerTP.WaypointScroll.CanvasSize = UDim2.new(0, 0, 0, ThemeObjects.PlayerTP.WaypointLayout.AbsoluteContentSize.Y + 2)
 end
+
 
 ThemeObjects.ExtrasFeature.AddWaypoint = function(part)
 	if not part or not part:IsA("BasePart") then return end
