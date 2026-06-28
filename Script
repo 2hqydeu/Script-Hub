@@ -250,7 +250,6 @@ ThemeObjects.ApplyMainGradient = function(intensity)
 		ColorSequenceKeypoint.new(1, Color3.new(0, 0, 0)),
 	})
 	if TargetTextureGradient then TargetTextureGradient.Color = MainTextureGradient.Color end
-	if ThemeObjects.PlayerTP and ThemeObjects.PlayerTP.Gradient then ThemeObjects.PlayerTP.Gradient.Color = MainTextureGradient.Color end
 end
 
 local function IsFrameLight()
@@ -335,13 +334,12 @@ local function UpdateTheme(instant)
 			end
 		local target = (obj:IsA("TextButton") or obj:IsA("TextBox") or obj.Name == "TabScroll" or obj.Name == "TargetRow") and secBgColor or bgColor
 			if obj:IsA("TextButton") and obj.Text == "On" then target = AccentColor end
-			if obj.Name == "PlayerTPFrame" then target = Color3.fromRGB(14, 18, 26)
-			if obj.Name == "DestroyBtn" then target = Color3.fromRGB(235, 35, 45)
-			elseif obj.Name == "ResetCharacterBtn" then target = Color3.fromRGB(255, 215, 35)
-			elseif obj.Name == "RejoinBtn" then target = Color3.fromRGB(0, 220, 255)
-			elseif obj.Name == "ServerHopBtn" then target = Color3.fromRGB(0, 95, 255)
-			elseif obj.Name == "GuiSizeBtn" then target = Color3.fromRGB(65, 255, 65)
-			elseif obj.Name == "ClearKeybindsBtn" then target = Color3.fromRGB(185, 65, 255) end
+			if obj.Name == "DestroyBtn" then target = Color3.fromRGB(125, 35, 40)
+			elseif obj.Name == "ResetCharacterBtn" then target = Color3.fromRGB(125, 88, 18)
+			elseif obj.Name == "RejoinBtn" then target = Color3.fromRGB(30, 135, 155)
+			elseif obj.Name == "ServerHopBtn" then target = Color3.fromRGB(20, 45, 150)
+			elseif obj.Name == "GuiSizeBtn" then target = Color3.fromRGB(35, 120, 35)
+			elseif obj.Name == "ClearKeybindsBtn" then target = Color3.fromRGB(100, 35, 130) end
 			TweenService:Create(obj, tweenInfo, {BackgroundColor3 = target}):Play()
 		else
 			table.remove(ThemeObjects.Backgrounds, i)
@@ -417,7 +415,6 @@ local Flinging = false
 local AntiFlingOriginalCollision = {}
 local FlingMenuKeybind = LoadKeybind("FlingMenu")
 local IsBindingFlingMenu = false
-ThemeObjects.PlayerTP = {Keybind = LoadKeybind("PlayerTPMenu"), Binding = false, Dragging = false}
 local BodyVelocity = nil
 local BodyGyro = nil
 local Connections = {}
@@ -2589,10 +2586,6 @@ end
 
 FlingTargetBtn.MouseButton1Click:Connect(function() PlayClick() ToggleFlingMenu() end)
 
--- Temporarily disabled: the floating TP popup was causing executor startup
--- crashes in some environments. The main Teleport tab remains active.
-ThemeObjects.PlayerTP.Toggle = function() end
-if false then
 ThemeObjects.PlayerTP.Frame = Instance.new("Frame")
 ThemeObjects.PlayerTP.Frame.Name = "PlayerTPFrame"
 ThemeObjects.PlayerTP.Frame.Size = UDim2.new(0, 210, 0, 175)
@@ -2787,7 +2780,7 @@ ThemeObjects.PlayerTP.Refresh = function()
 				usernameLabel.Text = "@" .. targetPlayer.Name
 				usernameLabel.Font = Enum.Font.GothamMedium
 				usernameLabel.TextSize = 8
-				usernameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+				usernameLabel.TextColor3 = InactiveTextColor()
 				usernameLabel.TextXAlignment = Enum.TextXAlignment.Left
 				usernameLabel.Parent = targetRow
 
@@ -2857,7 +2850,6 @@ UserInputService.InputChanged:Connect(function(input)
 		ThemeObjects.PlayerTP.Frame.Position = UDim2.new(ThemeObjects.PlayerTP.StartPosition.X.Scale, ThemeObjects.PlayerTP.StartPosition.X.Offset + delta.X, ThemeObjects.PlayerTP.StartPosition.Y.Scale, ThemeObjects.PlayerTP.StartPosition.Y.Offset + delta.Y)
 	end
 end)
-end
 
 FlingBindBtn.MouseButton1Click:Connect(function()
 	PlayClick()
@@ -3174,7 +3166,7 @@ function ThemeObjects.WaypointUI.Refresh()
 		waypointButton.Font = Enum.Font.GothamBold
 		waypointButton.TextSize = 10
 		waypointButton.TextTruncate = Enum.TextTruncate.AtEnd
-		waypointButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		waypointButton.TextColor3 = AccentColor
 		waypointButton.TextXAlignment = Enum.TextXAlignment.Left
 		waypointButton.Parent = waypointRow
 		table.insert(ThemeObjects.Backgrounds, waypointButton)
@@ -3293,7 +3285,7 @@ ThemeObjects.PlayerTP.RefreshWaypoints = function()
 			typeLabel.Text = waypoint.Kind == "Position" and "Saved position" or "Saved part"
 			typeLabel.Font = Enum.Font.GothamMedium
 			typeLabel.TextSize = 8
-			typeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+			typeLabel.TextColor3 = InactiveTextColor()
 			typeLabel.TextXAlignment = Enum.TextXAlignment.Left
 			typeLabel.Parent = waypointRow
 
@@ -3452,7 +3444,7 @@ local function UpdatePlayerList()
 		pName.Text = p.DisplayName or p.Name
 		pName.Font = Enum.Font.GothamMedium
 		pName.TextSize = 11
-		pName.TextColor3 = Color3.fromRGB(255, 255, 255)
+		pName.TextColor3 = Color3.fromRGB(200, 200, 215)
 		pName.TextXAlignment = Enum.TextXAlignment.Left
 		pName.Parent = pFrame
 		table.insert(ThemeObjects.Texts, pName)
@@ -4258,7 +4250,7 @@ do
 
 	local stabRow = CreateMM2ControlRow("AutoStabRow", 1, -8, 0, 4, 4, 38)
 	local shootRow = CreateMM2ControlRow("AutoShootRow", 1, -8, 0, 4, 48, 38)
-	local gunRow = CreateMM2ControlRow("AutoGunRow", 1, -8, 0, 4, 92, 38)
+	local gunRow = CreateMM2ControlRow("AutoGunRow", 1, -8, 0, 4, 92, 48)
 	local coinRow = CreateMM2ControlRow("CoinFarmRow", 1, -8, 0, 4, 146, 48)
 
 	local function PlaceMM2Control(title, toggle, row, fullWidth)
@@ -5273,7 +5265,7 @@ DestroyBtn = Instance.new("TextButton")
 DestroyBtn.Name = "DestroyBtn"
 DestroyBtn.Size = UDim2.new(0, 310, 0, 24)
 DestroyBtn.Position = UDim2.new(0, 10, 0, 116)
-DestroyBtn.BackgroundColor3 = Color3.fromRGB(235, 35, 45)
+DestroyBtn.BackgroundColor3 = Color3.fromRGB(125, 35, 40)
 DestroyBtn.BackgroundTransparency = 0
 DestroyBtn.BorderSizePixel = 0
 DestroyBtn.Text = "Destroy GUI"
@@ -5313,7 +5305,7 @@ local ClearKeybindsBtn = Instance.new("TextButton")
 ClearKeybindsBtn.Name = "ClearKeybindsBtn"
 ClearKeybindsBtn.Size = UDim2.new(0, 150, 0, 24)
 ClearKeybindsBtn.Position = UDim2.new(0, 170, 0, 76)
-ClearKeybindsBtn.BackgroundColor3 = Color3.fromRGB(185, 65, 255)
+ClearKeybindsBtn.BackgroundColor3 = Color3.fromRGB(100, 35, 130)
 ClearKeybindsBtn.BackgroundTransparency = 0
 ClearKeybindsBtn.BorderSizePixel = 0
 ClearKeybindsBtn.Text = "Remove All Keybinds"
@@ -5328,7 +5320,7 @@ local ResetCharacterBtn = Instance.new("TextButton")
 ResetCharacterBtn.Name = "ResetCharacterBtn"
 ResetCharacterBtn.Size = UDim2.new(0, 150, 0, 24)
 ResetCharacterBtn.Position = UDim2.new(0, 10, 0, 76)
-ResetCharacterBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 35)
+ResetCharacterBtn.BackgroundColor3 = Color3.fromRGB(125, 88, 18)
 ResetCharacterBtn.BackgroundTransparency = 0
 ResetCharacterBtn.BorderSizePixel = 0
 ResetCharacterBtn.Text = "Reset Character"
@@ -5342,7 +5334,7 @@ local RejoinBtn = Instance.new("TextButton")
 RejoinBtn.Name = "RejoinBtn"
 RejoinBtn.Size = UDim2.new(0, 150, 0, 24)
 RejoinBtn.Position = UDim2.new(0, 170, 0, 40)
-RejoinBtn.BackgroundColor3 = Color3.fromRGB(0, 220, 255)
+RejoinBtn.BackgroundColor3 = Color3.fromRGB(30, 135, 155)
 RejoinBtn.BackgroundTransparency = 0
 RejoinBtn.BorderSizePixel = 0
 RejoinBtn.Text = "Rejoin"
@@ -5356,7 +5348,7 @@ local ServerHopBtn = Instance.new("TextButton")
 ServerHopBtn.Name = "ServerHopBtn"
 ServerHopBtn.Size = UDim2.new(0, 150, 0, 24)
 ServerHopBtn.Position = UDim2.new(0, 10, 0, 40)
-ServerHopBtn.BackgroundColor3 = Color3.fromRGB(0, 95, 255)
+ServerHopBtn.BackgroundColor3 = Color3.fromRGB(20, 45, 150)
 ServerHopBtn.BackgroundTransparency = 0
 ServerHopBtn.BorderSizePixel = 0
 ServerHopBtn.Text = "Server Hop"
@@ -5370,7 +5362,7 @@ local GuiSizeBtn = Instance.new("TextButton")
 GuiSizeBtn.Name = "GuiSizeBtn"
 GuiSizeBtn.Size = UDim2.new(0, 150, 0, 20)
 GuiSizeBtn.Position = UDim2.new(0, 170, 0, 8)
-GuiSizeBtn.BackgroundColor3 = Color3.fromRGB(65, 255, 65)
+GuiSizeBtn.BackgroundColor3 = Color3.fromRGB(35, 120, 35)
 GuiSizeBtn.BackgroundTransparency = 0
 GuiSizeBtn.BorderSizePixel = 0
 GuiSizeBtn.Text = "GUI Size"
