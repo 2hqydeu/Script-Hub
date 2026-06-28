@@ -243,11 +243,11 @@ ThemeObjects.ApplyMainGradient = function(intensity)
 	intensity = math.clamp(intensity or 0.5, 0, 0.5)
 	local bgColor = FrameThemeColor
 	MainTextureGradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.new(0, 0, 0)),
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 10, 14)),
 		ColorSequenceKeypoint.new(0.18, bgColor:Lerp(AccentColor, intensity * 0.38)),
 		ColorSequenceKeypoint.new(0.48, bgColor:Lerp(AccentColor, intensity)),
 		ColorSequenceKeypoint.new(0.73, bgColor:Lerp(AccentColor, intensity * 0.72)),
-		ColorSequenceKeypoint.new(1, Color3.new(0, 0, 0)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 10, 14)),
 	})
 	if TargetTextureGradient then TargetTextureGradient.Color = MainTextureGradient.Color end
 	if ThemeObjects.PlayerTP and ThemeObjects.PlayerTP.Gradient then ThemeObjects.PlayerTP.Gradient.Color = MainTextureGradient.Color end
