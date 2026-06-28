@@ -250,6 +250,7 @@ ThemeObjects.ApplyMainGradient = function(intensity)
 		ColorSequenceKeypoint.new(1, bgColor:Lerp(AccentColor, intensity * 0.22)),
 	})
 	if TargetTextureGradient then TargetTextureGradient.Color = MainTextureGradient.Color end
+	if TeleportTextureGradient then TeleportTextureGradient.Color = MainTextureGradient.Color end
 end
 
 local function IsFrameLight()
@@ -351,7 +352,8 @@ local function UpdateTheme(instant)
 			local parentName = obj.Parent and obj.Parent.Name or ""
 			local isTileTitle = obj:IsA("TextLabel") and (parentName:find("Card", 1, true) or parentName:find("Row", 1, true))
 			local isToggleText = obj:IsA("TextButton") and (obj.Text == "On" or obj.Text == "Off")
-			local target = (obj.Name == "PageHeader" or obj.Name == "NavTabButton" or isTileTitle or isToggleText) and Color3.fromRGB(255, 255, 255)
+			local isTeleportText = ThemeObjects.TeleportPage and obj:IsDescendantOf(ThemeObjects.TeleportPage)
+			local target = (isTeleportText or obj.Name == "PageHeader" or obj.Name == "NavTabButton" or isTileTitle or isToggleText) and Color3.fromRGB(255, 255, 255)
 				or (obj.Parent and (obj.Parent:IsA("TextButton") or obj:IsA("TextBox")) and textColor or subTextColor)
 			TweenService:Create(obj, tweenInfo, {TextColor3 = target}):Play()
 		else
@@ -362,7 +364,9 @@ local function UpdateTheme(instant)
 		local obj = ThemeObjects.Accents[i]
 		if obj.Parent then
 			if obj:IsA("UIStroke") then obj.Color = AccentColor
-			elseif obj:IsA("GuiObject") then obj.TextColor3 = AccentColor end
+			elseif obj:IsA("GuiObject") then
+				obj.TextColor3 = ThemeObjects.TeleportPage and obj:IsDescendantOf(ThemeObjects.TeleportPage) and Color3.fromRGB(255, 255, 255) or AccentColor
+			end
 		else
 			table.remove(ThemeObjects.Accents, i)
 		end
@@ -387,6 +391,7 @@ local function UpdateTheme(instant)
 			table.remove(ThemeObjects.StateTexts, i)
 		end
 	end
+	if type(ThemeObjects.AfterThemeUpdate) == "function" then ThemeObjects.AfterThemeUpdate() end
 end
 
 -- Variables
@@ -415,6 +420,8 @@ local Flinging = false
 local AntiFlingOriginalCollision = {}
 local FlingMenuKeybind = LoadKeybind("FlingMenu")
 local IsBindingFlingMenu = false
+local TeleportMenuKeybind = LoadKeybind("TeleportMenu")
+local IsBindingTeleportMenu = false
 local BodyVelocity = nil
 local BodyGyro = nil
 local Connections = {}
@@ -580,6 +587,7 @@ TeleportPage.Visible = false
 TeleportPage.BorderSizePixel = 0
 TeleportPage.ClipsDescendants = true
 TeleportPage.Parent = MainFrame
+ThemeObjects.TeleportPage = TeleportPage
 
 local GamesPage = Instance.new("Frame")
 GamesPage.Name = "GamesPage"
@@ -2644,9 +2652,11 @@ PlayerSearch.BackgroundColor3 = Color3.fromRGB(38, 38, 52)
 PlayerSearch.BackgroundTransparency = 0.8
 PlayerSearch.BorderSizePixel = 0
 PlayerSearch.PlaceholderText = "Search players..."
+PlayerSearch.PlaceholderColor3 = Color3.fromRGB(255, 255, 255)
 PlayerSearch.Text = ""
 PlayerSearch.Font = Enum.Font.GothamMedium
 PlayerSearch.TextSize = 11
+PlayerSearch.TextColor3 = Color3.fromRGB(255, 255, 255)
 PlayerSearch.Parent = TeleportPage
 table.insert(ThemeObjects.Backgrounds, PlayerSearch)
 table.insert(ThemeObjects.Texts, PlayerSearch)
@@ -2654,6 +2664,49 @@ table.insert(ThemeObjects.Texts, PlayerSearch)
 local SearchCorner = Instance.new("UICorner")
 SearchCorner.CornerRadius = UDim.new(0, 4)
 SearchCorner.Parent = PlayerSearch
+
+local TeleportPopupTitle = Instance.new("TextLabel")
+TeleportPopupTitle.Name = "TeleportPopupTitle"
+TeleportPopupTitle.Size = UDim2.new(0, 54, 0, 28)
+TeleportPopupTitle.Position = UDim2.new(0, 108, 0, 4)
+TeleportPopupTitle.BackgroundTransparency = 1
+TeleportPopupTitle.Text = "TP Menu:"
+TeleportPopupTitle.Font = Enum.Font.GothamBold
+TeleportPopupTitle.TextSize = 10
+TeleportPopupTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+TeleportPopupTitle.TextXAlignment = Enum.TextXAlignment.Left
+TeleportPopupTitle.Parent = TeleportPage
+
+local TeleportPopupBtn = Instance.new("TextButton")
+TeleportPopupBtn.Name = "TeleportPopupBtn"
+TeleportPopupBtn.Size = UDim2.new(0, 44, 0, 20)
+TeleportPopupBtn.Position = UDim2.new(0, 162, 0, 8)
+TeleportPopupBtn.BackgroundColor3 = Color3.fromRGB(38, 38, 52)
+TeleportPopupBtn.BackgroundTransparency = 0.8
+TeleportPopupBtn.BorderSizePixel = 0
+TeleportPopupBtn.Text = "Open"
+TeleportPopupBtn.Font = Enum.Font.GothamBold
+TeleportPopupBtn.TextSize = 9
+TeleportPopupBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+TeleportPopupBtn.Parent = TeleportPage
+table.insert(ThemeObjects.Backgrounds, TeleportPopupBtn)
+Instance.new("UICorner", TeleportPopupBtn).CornerRadius = UDim.new(0, 4)
+
+local TeleportPopupBindBtn = Instance.new("TextButton")
+TeleportPopupBindBtn.Name = "TeleportPopupBindBtn"
+TeleportPopupBindBtn.Size = UDim2.new(0, 36, 0, 20)
+TeleportPopupBindBtn.Position = UDim2.new(0, 210, 0, 8)
+TeleportPopupBindBtn.BackgroundColor3 = Color3.fromRGB(38, 38, 52)
+TeleportPopupBindBtn.BackgroundTransparency = 0.8
+TeleportPopupBindBtn.BorderSizePixel = 0
+TeleportPopupBindBtn.Text = KeybindText(TeleportMenuKeybind)
+TeleportPopupBindBtn.Font = Enum.Font.GothamBold
+TeleportPopupBindBtn.TextSize = 8
+TeleportPopupBindBtn.TextColor3 = AccentColor
+TeleportPopupBindBtn.Parent = TeleportPage
+table.insert(ThemeObjects.Backgrounds, TeleportPopupBindBtn)
+table.insert(ThemeObjects.Accents, TeleportPopupBindBtn)
+Instance.new("UICorner", TeleportPopupBindBtn).CornerRadius = UDim.new(0, 4)
 
 ThemeObjects.WaypointToggleButton = Instance.new("TextButton")
 ThemeObjects.WaypointToggleButton.Name = "WaypointsToggleButton"
@@ -2700,6 +2753,16 @@ do
 	padding.PaddingBottom = UDim.new(0, 2)
 	padding.Parent = PlayerScroll
 end
+
+ThemeObjects.ForceTeleportTextWhite = function()
+	for _, obj in ipairs(TeleportPage:GetDescendants()) do
+		if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
+			obj.TextColor3 = Color3.fromRGB(255, 255, 255)
+			if obj:IsA("TextBox") then obj.PlaceholderColor3 = Color3.fromRGB(255, 255, 255) end
+		end
+	end
+end
+ThemeObjects.AfterThemeUpdate = ThemeObjects.ForceTeleportTextWhite
 
 SavedKeybinds.WaypointsByPlace = type(SavedKeybinds.WaypointsByPlace) == "table" and SavedKeybinds.WaypointsByPlace or {}
 ThemeObjects.WaypointUI = {StorageKey = tostring(game.PlaceId)}
@@ -2845,11 +2908,10 @@ function ThemeObjects.WaypointUI.Refresh()
 		waypointButton.Font = Enum.Font.GothamBold
 		waypointButton.TextSize = 10
 		waypointButton.TextTruncate = Enum.TextTruncate.AtEnd
-		waypointButton.TextColor3 = AccentColor
+		waypointButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 		waypointButton.TextXAlignment = Enum.TextXAlignment.Left
 		waypointButton.Parent = waypointRow
 		table.insert(ThemeObjects.Backgrounds, waypointButton)
-		table.insert(ThemeObjects.Accents, waypointButton)
 		Instance.new("UICorner", waypointButton).CornerRadius = UDim.new(0, 4)
 
 		local editButton = Instance.new("TextButton")
@@ -2898,13 +2960,13 @@ function ThemeObjects.WaypointUI.Refresh()
 			editBox.BorderSizePixel = 0
 			editBox.Text = waypoint.Name or "Waypoint"
 			editBox.PlaceholderText = "Waypoint name..."
-			editBox.PlaceholderColor3 = InactiveTextColor()
+			editBox.PlaceholderColor3 = Color3.fromRGB(255, 255, 255)
 			editBox.ClearTextOnFocus = false
 			editBox.Font = waypointButton.Font
 			editBox.TextSize = waypointButton.TextSize
 			editBox.TextXAlignment = Enum.TextXAlignment.Center
 			editBox.TextWrapped = false
-			editBox.TextColor3 = AccentColor
+			editBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 			editBox.Parent = waypointRow
 			table.insert(ThemeObjects.Accents, editBox)
 			Instance.new("UICorner", editBox).CornerRadius = UDim.new(0, 4)
@@ -2925,6 +2987,8 @@ function ThemeObjects.WaypointUI.Refresh()
 	end
 	ThemeObjects.WaypointUI.List.CanvasSize = UDim2.new(0, 0, 0, ThemeObjects.WaypointUI.Layout.AbsoluteContentSize.Y + 8)
 	UpdateTheme(true)
+	if type(ThemeObjects.ForceTeleportTextWhite) == "function" then ThemeObjects.ForceTeleportTextWhite() end
+	if type(ThemeObjects.RefreshTeleportPopup) == "function" then ThemeObjects.RefreshTeleportPopup() end
 end
 
 ThemeObjects.ExtrasFeature.AddWaypoint = function(part)
@@ -2980,6 +3044,307 @@ ThemeObjects.WaypointToggleButton.MouseButton1Click:Connect(function()
 end)
 ThemeObjects.ShowWaypointsPage(false)
 
+local TeleportPopupFrame = Instance.new("Frame")
+TeleportPopupFrame.Name = "TeleportPopupFrame"
+TeleportPopupFrame.Size = UDim2.new(0, 210, 0, 188)
+TeleportPopupFrame.Position = UDim2.new(0.5, -105, 0.5, -94)
+TeleportPopupFrame.BackgroundColor3 = Color3.fromRGB(14, 14, 18)
+TeleportPopupFrame.BackgroundTransparency = 0.55
+TeleportPopupFrame.BorderSizePixel = 0
+TeleportPopupFrame.Visible = false
+TeleportPopupFrame.Parent = ScreenGui
+local TeleportPopupScaleObject = Instance.new("UIScale", TeleportPopupFrame)
+TeleportPopupScaleObject.Scale = GuiScaleFromValue(GuiSizeValue)
+Instance.new("UICorner", TeleportPopupFrame).CornerRadius = UDim.new(0, 10)
+
+TeleportTextureGradient = Instance.new("UIGradient")
+TeleportTextureGradient.Rotation = 135
+TeleportTextureGradient.Parent = TeleportPopupFrame
+local TeleportTextureStroke = Instance.new("UIStroke")
+TeleportTextureStroke.Thickness = 1
+TeleportTextureStroke.Transparency = 0.62
+TeleportTextureStroke.Color = AccentColor
+TeleportTextureStroke.Parent = TeleportPopupFrame
+table.insert(ThemeObjects.Accents, TeleportTextureStroke)
+
+local TeleportPopupHeader = Instance.new("TextLabel")
+TeleportPopupHeader.Size = UDim2.new(0, 62, 0, 28)
+TeleportPopupHeader.Position = UDim2.new(0, 10, 0, 0)
+TeleportPopupHeader.BackgroundTransparency = 1
+TeleportPopupHeader.Text = "Teleport"
+TeleportPopupHeader.Font = Enum.Font.GothamBold
+TeleportPopupHeader.TextSize = 13
+TeleportPopupHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
+TeleportPopupHeader.TextXAlignment = Enum.TextXAlignment.Left
+TeleportPopupHeader.Parent = TeleportPopupFrame
+
+local TeleportPopupPlayersBtn = Instance.new("TextButton")
+TeleportPopupPlayersBtn.Name = "TeleportPopupPlayersBtn"
+TeleportPopupPlayersBtn.Size = UDim2.new(0, 58, 0, 20)
+TeleportPopupPlayersBtn.Position = UDim2.new(0.5, -60, 0, 5)
+TeleportPopupPlayersBtn.BackgroundColor3 = AccentColor
+TeleportPopupPlayersBtn.BorderSizePixel = 0
+TeleportPopupPlayersBtn.Text = "Players"
+TeleportPopupPlayersBtn.Font = Enum.Font.GothamBold
+TeleportPopupPlayersBtn.TextSize = 9
+TeleportPopupPlayersBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+TeleportPopupPlayersBtn.Parent = TeleportPopupFrame
+table.insert(ThemeObjects.AccentBackgrounds, TeleportPopupPlayersBtn)
+Instance.new("UICorner", TeleportPopupPlayersBtn).CornerRadius = UDim.new(0, 4)
+
+local TeleportPopupWaypointsBtn = Instance.new("TextButton")
+TeleportPopupWaypointsBtn.Name = "TeleportPopupWaypointsBtn"
+TeleportPopupWaypointsBtn.Size = UDim2.new(0, 58, 0, 20)
+TeleportPopupWaypointsBtn.Position = UDim2.new(0.5, 2, 0, 5)
+TeleportPopupWaypointsBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+TeleportPopupWaypointsBtn.BackgroundTransparency = 0.45
+TeleportPopupWaypointsBtn.BorderSizePixel = 0
+TeleportPopupWaypointsBtn.Text = "Waypoints"
+TeleportPopupWaypointsBtn.Font = Enum.Font.GothamBold
+TeleportPopupWaypointsBtn.TextSize = 9
+TeleportPopupWaypointsBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+TeleportPopupWaypointsBtn.Parent = TeleportPopupFrame
+table.insert(ThemeObjects.Backgrounds, TeleportPopupWaypointsBtn)
+Instance.new("UICorner", TeleportPopupWaypointsBtn).CornerRadius = UDim.new(0, 4)
+
+local TeleportPopupCloseBtn = Instance.new("TextButton")
+TeleportPopupCloseBtn.Size = UDim2.new(0, 20, 0, 20)
+TeleportPopupCloseBtn.Position = UDim2.new(1, -26, 0, 4)
+TeleportPopupCloseBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+TeleportPopupCloseBtn.BackgroundTransparency = 0.45
+TeleportPopupCloseBtn.BorderSizePixel = 0
+TeleportPopupCloseBtn.Text = "X"
+TeleportPopupCloseBtn.Font = Enum.Font.GothamBold
+TeleportPopupCloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+TeleportPopupCloseBtn.Parent = TeleportPopupFrame
+table.insert(ThemeObjects.Backgrounds, TeleportPopupCloseBtn)
+Instance.new("UICorner", TeleportPopupCloseBtn).CornerRadius = UDim.new(0, 4)
+
+local TeleportPopupSearch = Instance.new("TextBox")
+TeleportPopupSearch.Size = UDim2.new(1, -16, 0, 20)
+TeleportPopupSearch.Position = UDim2.new(0, 8, 0, 30)
+TeleportPopupSearch.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+TeleportPopupSearch.BackgroundTransparency = 0.45
+TeleportPopupSearch.BorderSizePixel = 0
+TeleportPopupSearch.PlaceholderText = "Search players..."
+TeleportPopupSearch.PlaceholderColor3 = Color3.fromRGB(255, 255, 255)
+TeleportPopupSearch.Text = ""
+TeleportPopupSearch.Font = Enum.Font.GothamMedium
+TeleportPopupSearch.TextSize = 11
+TeleportPopupSearch.TextColor3 = Color3.fromRGB(255, 255, 255)
+TeleportPopupSearch.Parent = TeleportPopupFrame
+table.insert(ThemeObjects.Backgrounds, TeleportPopupSearch)
+Instance.new("UICorner", TeleportPopupSearch).CornerRadius = UDim.new(0, 4)
+
+local TeleportPopupScroll = Instance.new("ScrollingFrame")
+TeleportPopupScroll.Size = UDim2.new(1, -16, 1, -58)
+TeleportPopupScroll.Position = UDim2.new(0, 8, 0, 54)
+TeleportPopupScroll.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+TeleportPopupScroll.BackgroundTransparency = 0.45
+TeleportPopupScroll.BorderSizePixel = 0
+TeleportPopupScroll.ScrollBarThickness = 2
+TeleportPopupScroll.ElasticBehavior = Enum.ElasticBehavior.Never
+TeleportPopupScroll.Parent = TeleportPopupFrame
+table.insert(ThemeObjects.Backgrounds, TeleportPopupScroll)
+Instance.new("UICorner", TeleportPopupScroll).CornerRadius = UDim.new(0, 6)
+
+local TeleportPopupListLayout = Instance.new("UIListLayout")
+TeleportPopupListLayout.Padding = UDim.new(0, 2)
+TeleportPopupListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+TeleportPopupListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+TeleportPopupListLayout.Parent = TeleportPopupScroll
+
+do
+	local padding = Instance.new("UIPadding")
+	padding.PaddingLeft = UDim.new(0, 2)
+	padding.PaddingRight = UDim.new(0, 2)
+	padding.PaddingTop = UDim.new(0, 1)
+	padding.PaddingBottom = UDim.new(0, 1)
+	padding.Parent = TeleportPopupScroll
+end
+
+local TeleportPopupMode = "Players"
+
+local function TeleportToPlayer(targetPlayer)
+	local character = Player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	local targetCharacter = targetPlayer and targetPlayer.Character
+	local targetRoot = targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart")
+	if root and targetRoot then root.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 3) end
+end
+
+local function TeleportToWaypoint(waypoint)
+	local waypointCFrame = ThemeObjects.WaypointUI.GetCFrame(waypoint)
+	local character = Player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if waypointCFrame and root then
+		root.CFrame = waypoint.Kind == "Position" and waypointCFrame or waypointCFrame * CFrame.new(0, 3, 0)
+	end
+end
+
+local function ClearTeleportPopupRows()
+	for _, child in ipairs(TeleportPopupScroll:GetChildren()) do
+		if child:IsA("Frame") then child:Destroy() end
+	end
+end
+
+local function RefreshTeleportPopup()
+	ClearTeleportPopupRows()
+	local filter = TeleportPopupSearch.Text:lower()
+	TeleportPopupPlayersBtn.BackgroundTransparency = TeleportPopupMode == "Players" and 0 or 0.45
+	TeleportPopupPlayersBtn.BackgroundColor3 = TeleportPopupMode == "Players" and AccentColor or Color3.fromRGB(28, 28, 34)
+	TeleportPopupWaypointsBtn.BackgroundTransparency = TeleportPopupMode == "Waypoints" and 0 or 0.45
+	TeleportPopupWaypointsBtn.BackgroundColor3 = TeleportPopupMode == "Waypoints" and AccentColor or Color3.fromRGB(28, 28, 34)
+	TeleportPopupSearch.PlaceholderText = TeleportPopupMode == "Players" and "Search players..." or "Search waypoints..."
+
+	if TeleportPopupMode == "Players" then
+		for _, targetPlayer in ipairs(Players:GetPlayers()) do
+			if targetPlayer ~= Player then
+				local displayText = targetPlayer.DisplayName or targetPlayer.Name
+				if filter == "" or displayText:lower():find(filter, 1, true) or targetPlayer.Name:lower():find(filter, 1, true) then
+					local playerRow = Instance.new("Frame")
+					playerRow.Name = "TeleportPopupPlayerRow"
+					playerRow.Size = UDim2.new(1, 0, 0, 30)
+					playerRow.BackgroundColor3 = Color3.fromRGB(34, 34, 42)
+					playerRow.BackgroundTransparency = 0.35
+					playerRow.BorderSizePixel = 0
+					playerRow.Parent = TeleportPopupScroll
+					Instance.new("UICorner", playerRow).CornerRadius = UDim.new(0, 4)
+
+					local displayLabel = Instance.new("TextLabel")
+					displayLabel.Size = UDim2.new(1, -12, 0, 16)
+					displayLabel.Position = UDim2.new(0, 7, 0, 1)
+					displayLabel.BackgroundTransparency = 1
+					displayLabel.Text = displayText
+					displayLabel.Font = Enum.Font.GothamBold
+					displayLabel.TextSize = 10
+					displayLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+					displayLabel.TextXAlignment = Enum.TextXAlignment.Left
+					displayLabel.Parent = playerRow
+
+					local usernameLabel = Instance.new("TextLabel")
+					usernameLabel.Size = UDim2.new(1, -12, 0, 11)
+					usernameLabel.Position = UDim2.new(0, 7, 0, 16)
+					usernameLabel.BackgroundTransparency = 1
+					usernameLabel.Text = "@" .. targetPlayer.Name
+					usernameLabel.Font = Enum.Font.GothamMedium
+					usernameLabel.TextSize = 8
+					usernameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+					usernameLabel.TextXAlignment = Enum.TextXAlignment.Left
+					usernameLabel.Parent = playerRow
+
+					local teleportButton = Instance.new("TextButton")
+					teleportButton.Size = UDim2.new(1, 0, 1, 0)
+					teleportButton.BackgroundTransparency = 1
+					teleportButton.Text = ""
+					teleportButton.Parent = playerRow
+					teleportButton.MouseButton1Click:Connect(function()
+						PlayClick()
+						TeleportToPlayer(targetPlayer)
+					end)
+				end
+			end
+		end
+	else
+		for _, waypoint in ipairs(ThemeObjects.WaypointUI.Waypoints) do
+			local waypointName = waypoint.Name or "Waypoint"
+			if filter == "" or waypointName:lower():find(filter, 1, true) then
+				local waypointRow = Instance.new("Frame")
+				waypointRow.Name = "TeleportPopupWaypointRow"
+				waypointRow.Size = UDim2.new(1, 0, 0, 30)
+				waypointRow.BackgroundColor3 = Color3.fromRGB(34, 34, 42)
+				waypointRow.BackgroundTransparency = 0.35
+				waypointRow.BorderSizePixel = 0
+				waypointRow.Parent = TeleportPopupScroll
+				Instance.new("UICorner", waypointRow).CornerRadius = UDim.new(0, 4)
+
+				local waypointLabel = Instance.new("TextLabel")
+				waypointLabel.Size = UDim2.new(1, -14, 1, 0)
+				waypointLabel.Position = UDim2.new(0, 7, 0, 0)
+				waypointLabel.BackgroundTransparency = 1
+				waypointLabel.Text = waypointName
+				waypointLabel.Font = Enum.Font.GothamBold
+				waypointLabel.TextSize = 10
+				waypointLabel.TextTruncate = Enum.TextTruncate.AtEnd
+				waypointLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+				waypointLabel.TextXAlignment = Enum.TextXAlignment.Left
+				waypointLabel.Parent = waypointRow
+
+				local teleportButton = Instance.new("TextButton")
+				teleportButton.Size = UDim2.new(1, 0, 1, 0)
+				teleportButton.BackgroundTransparency = 1
+				teleportButton.Text = ""
+				teleportButton.Parent = waypointRow
+				teleportButton.MouseButton1Click:Connect(function()
+					PlayClick()
+					TeleportToWaypoint(waypoint)
+				end)
+			end
+		end
+	end
+	TeleportPopupScroll.CanvasSize = UDim2.new(0, 0, 0, TeleportPopupListLayout.AbsoluteContentSize.Y + 2)
+end
+ThemeObjects.RefreshTeleportPopup = RefreshTeleportPopup
+
+local function ToggleTeleportMenu()
+	PlaySwoosh()
+	if not TeleportPopupFrame.Visible then RefreshTeleportPopup() end
+	TeleportPopupFrame.Visible = not TeleportPopupFrame.Visible
+end
+
+TeleportPopupSearch:GetPropertyChangedSignal("Text"):Connect(RefreshTeleportPopup)
+Players.PlayerAdded:Connect(RefreshTeleportPopup)
+Players.PlayerRemoving:Connect(RefreshTeleportPopup)
+TeleportPopupPlayersBtn.MouseButton1Click:Connect(function()
+	PlayClick()
+	TeleportPopupMode = "Players"
+	RefreshTeleportPopup()
+end)
+TeleportPopupWaypointsBtn.MouseButton1Click:Connect(function()
+	PlayClick()
+	TeleportPopupMode = "Waypoints"
+	RefreshTeleportPopup()
+end)
+TeleportPopupCloseBtn.MouseButton1Click:Connect(function() PlaySwoosh() TeleportPopupFrame.Visible = false end)
+TeleportPopupBtn.MouseButton1Click:Connect(function() PlayClick() ToggleTeleportMenu() end)
+TeleportPopupBindBtn.MouseButton1Click:Connect(function()
+	PlayClick()
+	IsBindingTeleportMenu = true
+	TeleportPopupBindBtn.Text = "..."
+	local bindConnection
+	bindConnection = UserInputService.InputBegan:Connect(function(input, processed)
+		if processed then return end
+		if input.UserInputType == Enum.UserInputType.Keyboard then
+			local selectedKey = input.KeyCode
+			TeleportMenuKeybind = selectedKey
+			SaveKeybind("TeleportMenu", selectedKey)
+			TeleportPopupBindBtn.Text = KeybindText(selectedKey)
+			IsBindingTeleportMenu = false
+			bindConnection:Disconnect()
+		end
+	end)
+end)
+
+local teleportPopupDragging = false
+local teleportPopupDragStart
+local teleportPopupStartPosition
+TeleportPopupHeader.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		teleportPopupDragging = true
+		teleportPopupDragStart = input.Position
+		teleportPopupStartPosition = TeleportPopupFrame.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then teleportPopupDragging = false end
+		end)
+	end
+end)
+UserInputService.InputChanged:Connect(function(input)
+	if teleportPopupDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+		local delta = input.Position - teleportPopupDragStart
+		TeleportPopupFrame.Position = UDim2.new(teleportPopupStartPosition.X.Scale, teleportPopupStartPosition.X.Offset + delta.X, teleportPopupStartPosition.Y.Scale, teleportPopupStartPosition.Y.Offset + delta.Y)
+	end
+end)
+
 local function UpdatePlayerList()
 	ThemeObjects.PlayerListReady = true
 	for _, item in pairs(PlayerScroll:GetChildren()) do
@@ -3003,10 +3368,9 @@ local function UpdatePlayerList()
 		pName.Text = p.DisplayName or p.Name
 		pName.Font = Enum.Font.GothamMedium
 		pName.TextSize = 11
-		pName.TextColor3 = Color3.fromRGB(200, 200, 215)
+		pName.TextColor3 = Color3.fromRGB(255, 255, 255)
 		pName.TextXAlignment = Enum.TextXAlignment.Left
 		pName.Parent = pFrame
-		table.insert(ThemeObjects.Texts, pName)
 
 		local tpBtn = Instance.new("TextButton")
 		tpBtn.Size = UDim2.new(0, 42, 0, 22)
@@ -3038,12 +3402,11 @@ local function UpdatePlayerList()
 
 		tpBtn.MouseButton1Click:Connect(function()
 			PlayClick()
-			if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-				Player.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
-			end
+			TeleportToPlayer(p)
 		end)
 	end
 	PlayerScroll.CanvasSize = UDim2.new(0, 0, 0, PlayerListLayout.AbsoluteContentSize.Y)
+	if type(ThemeObjects.ForceTeleportTextWhite) == "function" then ThemeObjects.ForceTeleportTextWhite() end
 end
 
 PlayerSearch:GetPropertyChangedSignal("Text"):Connect(function()
@@ -4724,7 +5087,7 @@ MiniButton.MouseButton1Click:Connect(ToggleGUI)
 
 -- Input Listener
 Connections.InputBegan = UserInputService.InputBegan:Connect(function(input, processed)
-	if processed or IsBindingSpeed or IsBindingFly or IsBindingNoclip or ThemeObjects.FreeCam.Binding or IsBindingAutoLock or IsBindingESP or IsBindingFlingMenu then return end
+	if processed or IsBindingSpeed or IsBindingFly or IsBindingNoclip or ThemeObjects.FreeCam.Binding or IsBindingAutoLock or IsBindingESP or IsBindingFlingMenu or IsBindingTeleportMenu then return end
 	if input.UserInputType ~= Enum.UserInputType.Keyboard then return end
 	if input.KeyCode == SpeedKeybind then ToggleSpeed()
 	elseif input.KeyCode == FlyKeybind then ToggleFly()
@@ -4733,6 +5096,7 @@ Connections.InputBegan = UserInputService.InputBegan:Connect(function(input, pro
 	elseif input.KeyCode == AutoLockKeybind then ToggleAutoLock()
     elseif input.KeyCode == ESPKeybind then ToggleESP()
 	elseif input.KeyCode == FlingMenuKeybind then ToggleFlingMenu()
+	elseif input.KeyCode == TeleportMenuKeybind then ToggleTeleportMenu()
     elseif input.KeyCode == Enum.KeyCode.LeftControl then ToggleGUI() 
     end
 end)
@@ -5141,7 +5505,7 @@ local function ApplyGuiSize(value)
 	GuiSizeValue = math.clamp(value, 20, 100)
 	GuiSizeValueLabel.Text = tostring(GuiSizeValue)
 	local targetScale = GuiScaleFromValue(GuiSizeValue)
-	for _, scaleObject in ipairs({MainScaleObject, TargetScaleObject, SplashScaleObject, ThemeObjects.PickerDockScale, ThemeObjects.GuiSizeDockScale, ThemeObjects.ExtrasFeature.CopyScale}) do
+	for _, scaleObject in ipairs({MainScaleObject, TargetScaleObject, TeleportPopupScaleObject, SplashScaleObject, ThemeObjects.PickerDockScale, ThemeObjects.GuiSizeDockScale, ThemeObjects.ExtrasFeature.CopyScale}) do
 		if scaleObject and scaleObject.Parent then
 			TweenService:Create(scaleObject, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Scale = targetScale}):Play()
 		end
@@ -5454,6 +5818,7 @@ ConfirmYesBtn.MouseButton1Click:Connect(function()
 	AutoLockKeybind = Enum.KeyCode.Unknown
 	ESPKeybind = Enum.KeyCode.Unknown
 	FlingMenuKeybind = Enum.KeyCode.Unknown
+	TeleportMenuKeybind = Enum.KeyCode.Unknown
 	SavedKeybinds.Speed = "Unknown"
 	SavedKeybinds.Fly = "Unknown"
 	SavedKeybinds.Noclip = "Unknown"
@@ -5461,6 +5826,7 @@ ConfirmYesBtn.MouseButton1Click:Connect(function()
 	SavedKeybinds.AutoLock = "Unknown"
 	SavedKeybinds.ESP = "Unknown"
 	SavedKeybinds.FlingMenu = "Unknown"
+	SavedKeybinds.TeleportMenu = "Unknown"
 	SpeedBindBtn.Text = "..."
 	FlyBindBtn.Text = "..."
 	NoclipBindBtn.Text = "..."
@@ -5468,6 +5834,7 @@ ConfirmYesBtn.MouseButton1Click:Connect(function()
 	AutoLockBindBtn.Text = "..."
 	ESPBindBtn.Text = "..."
 	FlingBindBtn.Text = "..."
+	TeleportPopupBindBtn.Text = "..."
 	SavePersistentSettings()
 	ConfirmClearFrame.Visible = false
 end)
