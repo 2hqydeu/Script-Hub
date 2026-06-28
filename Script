@@ -55,7 +55,7 @@ local function LoadColor(settingName, fallback)
 	return fallback
 end
 
-local DefaultFrameColor = Color3.fromRGB(28, 28, 38)
+local DefaultFrameColor = Color3.fromRGB(90, 90, 94)
 local DefaultAccentColor = Color3.fromRGB(0, 210, 255)
 local FrameThemeColor = DefaultFrameColor
 local AccentColor = LoadColor("ThemeAccent", DefaultAccentColor)
@@ -233,11 +233,11 @@ ThemeObjects.ApplyMainGradient = function(intensity)
 	intensity = math.clamp(intensity or 0.65, 0, 1)
 	local bgColor = FrameThemeColor
 	MainTextureGradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.new(0, 0, 0)),
+		ColorSequenceKeypoint.new(0, bgColor:Lerp(Color3.new(0, 0, 0), 0.08)),
 		ColorSequenceKeypoint.new(0.18, bgColor:Lerp(AccentColor, intensity * 0.38)),
 		ColorSequenceKeypoint.new(0.48, bgColor:Lerp(AccentColor, intensity)),
 		ColorSequenceKeypoint.new(0.73, bgColor:Lerp(AccentColor, intensity * 0.72)),
-		ColorSequenceKeypoint.new(1, Color3.new(0, 0, 0)),
+		ColorSequenceKeypoint.new(1, bgColor:Lerp(AccentColor, intensity * 0.22)),
 	})
 	if TargetTextureGradient then TargetTextureGradient.Color = MainTextureGradient.Color end
 	if ThemeObjects.PlayerTP and ThemeObjects.PlayerTP.Gradient then ThemeObjects.PlayerTP.Gradient.Color = MainTextureGradient.Color end
