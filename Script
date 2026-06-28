@@ -335,7 +335,7 @@ local function UpdateTheme(instant)
 			end
 		local target = (obj:IsA("TextButton") or obj:IsA("TextBox") or obj.Name == "TabScroll" or obj.Name == "TargetRow") and secBgColor or bgColor
 			if obj:IsA("TextButton") and obj.Text == "On" then target = AccentColor end
-			if obj.Name == "PlayerTPFrame" then target = Color3.fromRGB(14, 18, 26)
+			if obj.Name == "PlayerTPFrame" then target = Color3.fromRGB(14, 18, 26) end
 			if obj.Name == "DestroyBtn" then target = Color3.fromRGB(235, 35, 45)
 			elseif obj.Name == "ResetCharacterBtn" then target = Color3.fromRGB(255, 215, 35)
 			elseif obj.Name == "RejoinBtn" then target = Color3.fromRGB(0, 220, 255)
