@@ -327,12 +327,12 @@ local function UpdateTheme(instant)
 			if obj.Name == "PlayerTPFrame" then target = Color3.fromRGB(14, 18, 26)
 			end
 			if obj:IsA("TextButton") and obj.Text == "On" then target = AccentColor end
-			if obj.Name == "DestroyBtn" then target = Color3.fromRGB(125, 35, 40)
-			elseif obj.Name == "ResetCharacterBtn" then target = Color3.fromRGB(125, 88, 18)
-			elseif obj.Name == "RejoinBtn" then target = Color3.fromRGB(30, 135, 155)
-			elseif obj.Name == "ServerHopBtn" then target = Color3.fromRGB(20, 45, 150)
-			elseif obj.Name == "GuiSizeBtn" then target = Color3.fromRGB(35, 120, 35)
-			elseif obj.Name == "ClearKeybindsBtn" then target = Color3.fromRGB(100, 35, 130) end
+			if obj.Name == "DestroyBtn" then target = Color3.fromRGB(235, 35, 45)
+			elseif obj.Name == "ResetCharacterBtn" then target = Color3.fromRGB(255, 215, 35)
+			elseif obj.Name == "RejoinBtn" then target = Color3.fromRGB(0, 220, 255)
+			elseif obj.Name == "ServerHopBtn" then target = Color3.fromRGB(0, 95, 255)
+			elseif obj.Name == "GuiSizeBtn" then target = Color3.fromRGB(65, 255, 65)
+			elseif obj.Name == "ClearKeybindsBtn" then target = Color3.fromRGB(185, 65, 255) end
 			TweenService:Create(obj, tweenInfo, {BackgroundColor3 = target}):Play()
 		else
 			table.remove(ThemeObjects.Backgrounds, i)
@@ -5264,7 +5264,7 @@ DestroyBtn = Instance.new("TextButton")
 DestroyBtn.Name = "DestroyBtn"
 DestroyBtn.Size = UDim2.new(0, 310, 0, 24)
 DestroyBtn.Position = UDim2.new(0, 10, 0, 116)
-DestroyBtn.BackgroundColor3 = Color3.fromRGB(125, 35, 40)
+DestroyBtn.BackgroundColor3 = Color3.fromRGB(235, 35, 45)
 DestroyBtn.BackgroundTransparency = 0
 DestroyBtn.BorderSizePixel = 0
 DestroyBtn.Text = "Destroy GUI"
@@ -5304,7 +5304,7 @@ local ClearKeybindsBtn = Instance.new("TextButton")
 ClearKeybindsBtn.Name = "ClearKeybindsBtn"
 ClearKeybindsBtn.Size = UDim2.new(0, 150, 0, 24)
 ClearKeybindsBtn.Position = UDim2.new(0, 170, 0, 76)
-ClearKeybindsBtn.BackgroundColor3 = Color3.fromRGB(100, 35, 130)
+ClearKeybindsBtn.BackgroundColor3 = Color3.fromRGB(185, 65, 255)
 ClearKeybindsBtn.BackgroundTransparency = 0
 ClearKeybindsBtn.BorderSizePixel = 0
 ClearKeybindsBtn.Text = "Remove All Keybinds"
@@ -5319,7 +5319,7 @@ local ResetCharacterBtn = Instance.new("TextButton")
 ResetCharacterBtn.Name = "ResetCharacterBtn"
 ResetCharacterBtn.Size = UDim2.new(0, 150, 0, 24)
 ResetCharacterBtn.Position = UDim2.new(0, 10, 0, 76)
-ResetCharacterBtn.BackgroundColor3 = Color3.fromRGB(125, 88, 18)
+ResetCharacterBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 35)
 ResetCharacterBtn.BackgroundTransparency = 0
 ResetCharacterBtn.BorderSizePixel = 0
 ResetCharacterBtn.Text = "Reset Character"
@@ -5333,7 +5333,7 @@ local RejoinBtn = Instance.new("TextButton")
 RejoinBtn.Name = "RejoinBtn"
 RejoinBtn.Size = UDim2.new(0, 150, 0, 24)
 RejoinBtn.Position = UDim2.new(0, 170, 0, 40)
-RejoinBtn.BackgroundColor3 = Color3.fromRGB(30, 135, 155)
+RejoinBtn.BackgroundColor3 = Color3.fromRGB(0, 220, 255)
 RejoinBtn.BackgroundTransparency = 0
 RejoinBtn.BorderSizePixel = 0
 RejoinBtn.Text = "Rejoin"
@@ -5347,7 +5347,7 @@ local ServerHopBtn = Instance.new("TextButton")
 ServerHopBtn.Name = "ServerHopBtn"
 ServerHopBtn.Size = UDim2.new(0, 150, 0, 24)
 ServerHopBtn.Position = UDim2.new(0, 10, 0, 40)
-ServerHopBtn.BackgroundColor3 = Color3.fromRGB(20, 45, 150)
+ServerHopBtn.BackgroundColor3 = Color3.fromRGB(0, 95, 255)
 ServerHopBtn.BackgroundTransparency = 0
 ServerHopBtn.BorderSizePixel = 0
 ServerHopBtn.Text = "Server Hop"
@@ -5361,7 +5361,7 @@ local GuiSizeBtn = Instance.new("TextButton")
 GuiSizeBtn.Name = "GuiSizeBtn"
 GuiSizeBtn.Size = UDim2.new(0, 150, 0, 20)
 GuiSizeBtn.Position = UDim2.new(0, 170, 0, 8)
-GuiSizeBtn.BackgroundColor3 = Color3.fromRGB(35, 120, 35)
+GuiSizeBtn.BackgroundColor3 = Color3.fromRGB(65, 255, 65)
 GuiSizeBtn.BackgroundTransparency = 0
 GuiSizeBtn.BorderSizePixel = 0
 GuiSizeBtn.Text = "GUI Size"
