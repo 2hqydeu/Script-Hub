@@ -75,6 +75,13 @@ local function KeybindText(keyCode)
 end
 
 -- Main Container
+pcall(function()
+	local oldGui = CoreGui:FindFirstChild("HqydeuLoader")
+	if oldGui then oldGui:Destroy() end
+	local oldError = CoreGui:FindFirstChild("HqydeuLoaderError")
+	if oldError then oldError:Destroy() end
+end)
+
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "HqydeuLoader"
 ScreenGui.Parent = CoreGui
@@ -3270,6 +3277,9 @@ function ThemeObjects.WaypointUI.Refresh()
 end
 
 ThemeObjects.PlayerTP.RefreshWaypoints = function()
+	if not (ThemeObjects.PlayerTP and ThemeObjects.PlayerTP.WaypointScroll and ThemeObjects.PlayerTP.WaypointSearch and ThemeObjects.WaypointUI and ThemeObjects.WaypointUI.Waypoints) then
+		return
+	end
 	for _, child in ipairs(ThemeObjects.PlayerTP.WaypointScroll:GetChildren()) do
 		if child:IsA("Frame") then child:Destroy() end
 	end
