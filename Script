@@ -75,13 +75,6 @@ local function KeybindText(keyCode)
 end
 
 -- Main Container
-pcall(function()
-	local oldGui = CoreGui:FindFirstChild("HqydeuLoader")
-	if oldGui then oldGui:Destroy() end
-	local oldError = CoreGui:FindFirstChild("HqydeuLoaderError")
-	if oldError then oldError:Destroy() end
-end)
-
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "HqydeuLoader"
 ScreenGui.Parent = CoreGui
@@ -159,7 +152,7 @@ MainTextureGradient.Rotation = 125
 MainTextureGradient.Parent = MainFrame
 
 local MainTextureStroke = Instance.new("UIStroke")
-MainTextureStroke.Thickness = 0
+MainTextureStroke.Thickness = 2.25
 MainTextureStroke.Transparency = 1
 MainTextureStroke.Parent = MainFrame
 
@@ -170,7 +163,7 @@ do
 	local pattern = Instance.new("Frame")
 	pattern.Name = "MinimalPattern"
 	pattern.Size = UDim2.new(0, 66, 0, 22)
-	pattern.Position = UDim2.new(0.5, -33, 0, 5)
+	pattern.Position = UDim2.new(0, 212, 0, 5)
 	pattern.BackgroundTransparency = 1
 	pattern.ClipsDescendants = true
 	pattern.ZIndex = 2
@@ -189,6 +182,11 @@ do
 		bar.ZIndex = 2
 		bar.Parent = pattern
 		Instance.new("UICorner", bar).CornerRadius = UDim.new(1, 0)
+		local barOutline = Instance.new("UIStroke")
+		barOutline.Color = Color3.fromRGB(0, 0, 0)
+		barOutline.Thickness = 1
+		barOutline.Transparency = 0.12
+		barOutline.Parent = bar
 		table.insert(MainPatternLines, bar)
 	end
 
@@ -212,6 +210,11 @@ do
 		bar.ZIndex = 1
 		bar.Parent = splashEmblem
 		Instance.new("UICorner", bar).CornerRadius = UDim.new(1, 0)
+		local barOutline = Instance.new("UIStroke")
+		barOutline.Color = Color3.fromRGB(0, 0, 0)
+		barOutline.Thickness = 1.25
+		barOutline.Transparency = 0.12
+		barOutline.Parent = bar
 		table.insert(MainPatternLines, bar)
 	end
 	SplashText.ZIndex = 2
@@ -230,34 +233,20 @@ SwooshSound.SoundId = "rbxassetid://107710687218353"
 SwooshSound.Volume = 0.6
 SwooshSound.Parent = MainFrame
 
-local FeatureToggleSound = Instance.new("Sound")
-FeatureToggleSound.SoundId = "rbxassetid://87437544236708"
-FeatureToggleSound.Volume = 0.65
-FeatureToggleSound.Parent = MainFrame
-
-local MinimizeSound = Instance.new("Sound")
-MinimizeSound.SoundId = "rbxassetid://132442985525251"
-MinimizeSound.Volume = 0.65
-MinimizeSound.Parent = MainFrame
-
 local function PlayClick() ClickSound:Play() end
 local function PlaySwoosh() SwooshSound:Play() end
-local function PlayFeatureToggle() FeatureToggleSound:Play() end
-local function PlayMinimizeSound() MinimizeSound:Play() end
 
 -- Theme Management
 local ThemeObjects = { Backgrounds = {}, Texts = {}, Accents = {}, AccentBackgrounds = {}, StateTexts = {} }
 
 ThemeObjects.ApplyMainGradient = function(intensity)
-	intensity = math.clamp(intensity or 0.65, 0, 1)
+	intensity = math.clamp(intensity or 0.5, 0, 0.5)
 	local bgColor = FrameThemeColor
 	MainTextureGradient.Color = ColorSequence.new({
 		ColorSequenceKeypoint.new(0, Color3.new(0, 0, 0)),
-		ColorSequenceKeypoint.new(0.08, Color3.new(0, 0, 0)),
 		ColorSequenceKeypoint.new(0.18, bgColor:Lerp(AccentColor, intensity * 0.38)),
 		ColorSequenceKeypoint.new(0.48, bgColor:Lerp(AccentColor, intensity)),
 		ColorSequenceKeypoint.new(0.73, bgColor:Lerp(AccentColor, intensity * 0.72)),
-		ColorSequenceKeypoint.new(0.92, Color3.new(0, 0, 0)),
 		ColorSequenceKeypoint.new(1, Color3.new(0, 0, 0)),
 	})
 	if TargetTextureGradient then TargetTextureGradient.Color = MainTextureGradient.Color end
@@ -330,7 +319,7 @@ local function UpdateTheme(instant)
 	
 	TweenService:Create(MainFrame, tweenInfo, {BackgroundColor3 = bgColor}):Play()
 	if SplashFrame and SplashFrame.Parent then SplashFrame.BackgroundColor3 = bgColor end
-	ThemeObjects.ApplyMainGradient(0.65)
+	ThemeObjects.ApplyMainGradient(0.5)
 	MainTextureStroke.Color = AccentColor
 	if ThemeObjects.TabScroll and ThemeObjects.TabScroll.Parent then ThemeObjects.TabScroll.ScrollBarImageColor3 = AccentColor end
 	for _, line in ipairs(MainPatternLines) do
@@ -345,9 +334,8 @@ local function UpdateTheme(instant)
 				obj.BackgroundTransparency = keepSolid and 0 or 0.8
 			end
 		local target = (obj:IsA("TextButton") or obj:IsA("TextBox") or obj.Name == "TabScroll" or obj.Name == "TargetRow") and secBgColor or bgColor
-			if obj.Name == "PlayerTPFrame" then target = Color3.fromRGB(14, 18, 26)
-			end
 			if obj:IsA("TextButton") and obj.Text == "On" then target = AccentColor end
+			if obj.Name == "PlayerTPFrame" then target = Color3.fromRGB(14, 18, 26)
 			if obj.Name == "DestroyBtn" then target = Color3.fromRGB(235, 35, 45)
 			elseif obj.Name == "ResetCharacterBtn" then target = Color3.fromRGB(255, 215, 35)
 			elseif obj.Name == "RejoinBtn" then target = Color3.fromRGB(0, 220, 255)
@@ -464,8 +452,7 @@ Connections.GradientPulse = RunService.Heartbeat:Connect(function(deltaTime)
 	if ThemeObjects.GradientPulseAccumulator < 0.05 then return end
 	ThemeObjects.GradientPulseAccumulator = 0
 	if type(ThemeObjects.ApplyMainGradient) == "function" then
-		local breath = (math.sin(ThemeObjects.GradientPulseTime * 1.55 - math.pi * 0.5) + 1) * 0.5
-		pcall(ThemeObjects.ApplyMainGradient, 0.65 + breath * 0.35)
+		pcall(ThemeObjects.ApplyMainGradient, 0.5)
 	end
 end)
 ThemeObjects.FreeCam = {Enabled = false, Keybind = LoadKeybind("FreeCam"), Binding = false}
@@ -696,7 +683,6 @@ table.insert(ThemeObjects.StateTexts, {Object = ThemeObjects.ExtrasFeature.Title
 
 ThemeObjects.ExtrasFeature.Toggle.MouseButton1Click:Connect(function()
 	PlayClick()
-	PlayFeatureToggle()
 	ThemeObjects.ExtrasFeature.Enabled = not ThemeObjects.ExtrasFeature.Enabled
 	ThemeObjects.ExtrasFeature.Toggle.Text = ThemeObjects.ExtrasFeature.Enabled and "On" or "Off"
 	ThemeObjects.ExtrasFeature.Title.TextColor3 = ThemeObjects.ExtrasFeature.Enabled and AccentColor or InactiveTextColor()
@@ -1079,7 +1065,6 @@ do
 	quietPage.ClipsDescendants = true
 	quietPage.ScrollBarThickness = 3
 	quietPage.ScrollBarImageColor3 = AccentColor
-	quietPage.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
 	quietPage.CanvasSize = UDim2.new(0, 0, 0, 292)
 	quietPage.Visible = false
 	quietPage.Parent = MainFrame
@@ -1109,7 +1094,7 @@ do
 
 	local killRow = Instance.new("Frame")
 	killRow.Name = "QuietOrDieKillRow"
-	killRow.Size = UDim2.new(1, -18, 0, 38)
+	killRow.Size = UDim2.new(1, -8, 0, 38)
 	killRow.Position = UDim2.new(0, 4, 0, 74)
 	killRow.BackgroundColor3 = Color3.fromRGB(65, 65, 67)
 	killRow.BackgroundTransparency = 0.92
@@ -1145,7 +1130,7 @@ do
 
 	local farmRow = Instance.new("Frame")
 	farmRow.Name = "QuietOrDieFarmRow"
-	farmRow.Size = UDim2.new(1, -18, 0, 62)
+	farmRow.Size = UDim2.new(1, -8, 0, 62)
 	farmRow.Position = UDim2.new(0, 4, 0, 4)
 	farmRow.BackgroundColor3 = Color3.fromRGB(65, 65, 67)
 	farmRow.BackgroundTransparency = 0.92
@@ -1364,7 +1349,7 @@ do
 
 	local eventRow = Instance.new("Frame")
 	eventRow.Name = "QuietOrDieEventRow"
-	eventRow.Size = UDim2.new(1, -18, 0, 38)
+	eventRow.Size = UDim2.new(1, -8, 0, 38)
 	eventRow.Position = UDim2.new(0, 4, 0, 206)
 	eventRow.BackgroundColor3 = Color3.fromRGB(65, 65, 67)
 	eventRow.BackgroundTransparency = 0.92
@@ -1400,7 +1385,7 @@ do
 
 	local reviveRow = Instance.new("Frame")
 	reviveRow.Name = "QuietOrDieReviveRow"
-	reviveRow.Size = UDim2.new(1, -18, 0, 38)
+	reviveRow.Size = UDim2.new(1, -8, 0, 38)
 	reviveRow.Position = UDim2.new(0, 4, 0, 162)
 	reviveRow.BackgroundColor3 = Color3.fromRGB(65, 65, 67)
 	reviveRow.BackgroundTransparency = 0.92
@@ -1437,7 +1422,7 @@ do
 	ThemeObjects.QODReveal = {Enabled = false, LastFire = 0}
 	ThemeObjects.QODReveal.Row = Instance.new("Frame")
 	ThemeObjects.QODReveal.Row.Name = "QuietOrDieRevealRow"
-	ThemeObjects.QODReveal.Row.Size = UDim2.new(1, -18, 0, 38)
+	ThemeObjects.QODReveal.Row.Size = UDim2.new(1, -8, 0, 38)
 	ThemeObjects.QODReveal.Row.Position = UDim2.new(0, 4, 0, 250)
 	ThemeObjects.QODReveal.Row.BackgroundColor3 = Color3.fromRGB(65, 65, 67)
 	ThemeObjects.QODReveal.Row.BackgroundTransparency = 0.92
@@ -1473,10 +1458,9 @@ do
 	Instance.new("UICorner", ThemeObjects.QODReveal.Toggle).CornerRadius = UDim.new(0, 5)
 	table.insert(ThemeObjects.StateTexts, {Object = ThemeObjects.QODReveal.Title, IsEnabled = function() return ThemeObjects.QODReveal.Enabled end})
 
-ThemeObjects.QODReveal.Toggle.MouseButton1Click:Connect(function()
-	PlayClick()
-	PlayFeatureToggle()
-	ThemeObjects.QODReveal.Enabled = not ThemeObjects.QODReveal.Enabled
+	ThemeObjects.QODReveal.Toggle.MouseButton1Click:Connect(function()
+		PlayClick()
+		ThemeObjects.QODReveal.Enabled = not ThemeObjects.QODReveal.Enabled
 		ThemeObjects.QODReveal.LastFire = 0
 		ThemeObjects.QODReveal.Toggle.Text = ThemeObjects.QODReveal.Enabled and "On" or "Off"
 		ThemeObjects.QODReveal.Title.TextColor3 = ThemeObjects.QODReveal.Enabled and AccentColor or InactiveTextColor()
@@ -1633,18 +1617,16 @@ ThemeObjects.QODReveal.Toggle.MouseButton1Click:Connect(function()
 			ThemeObjects.FlushQuietHistory()
 		end
 	end)
-killToggle.MouseButton1Click:Connect(function()
-	PlayClick()
-	PlayFeatureToggle()
-	killState.Enabled = not killState.Enabled
+	killToggle.MouseButton1Click:Connect(function()
+		PlayClick()
+		killState.Enabled = not killState.Enabled
 		killToggle.Text = killState.Enabled and "On" or "Off"
 		killTitle.TextColor3 = killState.Enabled and AccentColor or InactiveTextColor()
 	end)
 	table.insert(ThemeObjects.StateTexts, {Object = killTitle, IsEnabled = function() return killState.Enabled end})
-reviveToggle.MouseButton1Click:Connect(function()
-	PlayClick()
-	PlayFeatureToggle()
-	reviveState.Enabled = not reviveState.Enabled
+	reviveToggle.MouseButton1Click:Connect(function()
+		PlayClick()
+		reviveState.Enabled = not reviveState.Enabled
 		reviveToggle.Text = reviveState.Enabled and "On" or "Off"
 		reviveTitle.TextColor3 = reviveState.Enabled and AccentColor or InactiveTextColor()
 	end)
@@ -1668,10 +1650,9 @@ reviveToggle.MouseButton1Click:Connect(function()
 	end)
 	table.insert(ThemeObjects.StateTexts, {Object = farmTitle, IsEnabled = function() return farmState.Enabled end})
 
-safePlaceToggle.MouseButton1Click:Connect(function()
-	PlayClick()
-	PlayFeatureToggle()
-	farmState.SafePlace = not farmState.SafePlace
+	safePlaceToggle.MouseButton1Click:Connect(function()
+		PlayClick()
+		farmState.SafePlace = not farmState.SafePlace
 		farmState.DroppedCharacter = nil
 		if farmState.SafePlace and farmState.Enabled and eventState.Enabled then
 			eventState.Enabled = false
@@ -1683,20 +1664,18 @@ safePlaceToggle.MouseButton1Click:Connect(function()
 	end)
 	table.insert(ThemeObjects.StateTexts, {Object = safePlaceToggle, IsEnabled = function() return farmState.SafePlace end})
 
-unclutterToggle.MouseButton1Click:Connect(function()
-	PlayClick()
-	PlayFeatureToggle()
-	farmState.MuteAudio = not farmState.MuteAudio
+	unclutterToggle.MouseButton1Click:Connect(function()
+		PlayClick()
+		farmState.MuteAudio = not farmState.MuteAudio
 		unclutterToggle.Text = farmState.MuteAudio and "Unmute" or "Mute"
 		unclutterToggle.TextColor3 = farmState.MuteAudio and AccentColor or InactiveTextColor()
 		if farmState.SetUnclutter then farmState.SetUnclutter(farmState.MuteAudio) end
 	end)
 	table.insert(ThemeObjects.StateTexts, {Object = unclutterToggle, IsEnabled = function() return farmState.MuteAudio end})
 
-eventToggle.MouseButton1Click:Connect(function()
-	PlayClick()
-	PlayFeatureToggle()
-	eventState.Enabled = not eventState.Enabled
+	eventToggle.MouseButton1Click:Connect(function()
+		PlayClick()
+		eventState.Enabled = not eventState.Enabled
 		if eventState.Enabled and farmState.Enabled and farmState.SafePlace then
 			farmState.Enabled = false
 			farmToggle.Text = "Off"
@@ -2129,7 +2108,7 @@ GreenBtn.MouseButton1Click:Connect(function() PlayClick() ESPColor = Color3.from
 ThemeObjects.DeepESP = {Enabled = false}
 ThemeObjects.DeepESP.Row = Instance.new("Frame")
 ThemeObjects.DeepESP.Row.Name = "QuietOrDieDeepESPRow"
-	ThemeObjects.DeepESP.Row.Size = UDim2.new(1, -18, 0, 38)
+ThemeObjects.DeepESP.Row.Size = UDim2.new(1, -8, 0, 38)
 ThemeObjects.DeepESP.Row.Position = UDim2.new(0, 4, 0, 118)
 ThemeObjects.DeepESP.Row.BackgroundColor3 = Color3.fromRGB(65, 65, 67)
 ThemeObjects.DeepESP.Row.BackgroundTransparency = 0.92
@@ -2165,7 +2144,6 @@ Instance.new("UICorner", ThemeObjects.DeepESP.Toggle).CornerRadius = UDim.new(0,
 
 ThemeObjects.DeepESP.Toggle.MouseButton1Click:Connect(function()
 	PlayClick()
-	PlayFeatureToggle()
 	ThemeObjects.DeepESP.Enabled = not ThemeObjects.DeepESP.Enabled
 	ThemeObjects.DeepESP.Toggle.Text = ThemeObjects.DeepESP.Enabled and "On" or "Off"
 	ThemeObjects.DeepESP.Title.TextColor3 = ThemeObjects.DeepESP.Enabled and AccentColor or InactiveTextColor()
@@ -2173,7 +2151,6 @@ ThemeObjects.DeepESP.Toggle.MouseButton1Click:Connect(function()
 end)
 
 local function ToggleAutoLock()
-	PlayFeatureToggle()
 	AutoLockEnabled = not AutoLockEnabled
 	AutoLockToggleBtn.Text = AutoLockEnabled and "On" or "Off"
 	AutoLockTitle.TextColor3 = AutoLockEnabled and AccentColor or InactiveTextColor()
@@ -2225,7 +2202,6 @@ ThemeObjects.ClearESPAdornments = function(targetPlayer)
 end
 
 local function ToggleESP()
-	PlayFeatureToggle()
 	ESPEnabled = not ESPEnabled
 	ESPToggleBtn.Text = ESPEnabled and "On" or "Off"
 	ESPTitle.TextColor3 = ESPEnabled and AccentColor or InactiveTextColor()
@@ -2613,6 +2589,10 @@ end
 
 FlingTargetBtn.MouseButton1Click:Connect(function() PlayClick() ToggleFlingMenu() end)
 
+-- Temporarily disabled: the floating TP popup was causing executor startup
+-- crashes in some environments. The main Teleport tab remains active.
+ThemeObjects.PlayerTP.Toggle = function() end
+if false then
 ThemeObjects.PlayerTP.Frame = Instance.new("Frame")
 ThemeObjects.PlayerTP.Frame.Name = "PlayerTPFrame"
 ThemeObjects.PlayerTP.Frame.Size = UDim2.new(0, 210, 0, 175)
@@ -2772,9 +2752,6 @@ do
 end
 
 ThemeObjects.PlayerTP.Refresh = function()
-	if not (ThemeObjects.PlayerTP and ThemeObjects.PlayerTP.Scroll and ThemeObjects.PlayerTP.Search and ThemeObjects.PlayerTP.Layout) then
-		return
-	end
 	for _, child in ipairs(ThemeObjects.PlayerTP.Scroll:GetChildren()) do
 		if child:IsA("Frame") then child:Destroy() end
 	end
@@ -2880,7 +2857,7 @@ UserInputService.InputChanged:Connect(function(input)
 		ThemeObjects.PlayerTP.Frame.Position = UDim2.new(ThemeObjects.PlayerTP.StartPosition.X.Scale, ThemeObjects.PlayerTP.StartPosition.X.Offset + delta.X, ThemeObjects.PlayerTP.StartPosition.Y.Scale, ThemeObjects.PlayerTP.StartPosition.Y.Offset + delta.Y)
 	end
 end)
-
+end
 
 FlingBindBtn.MouseButton1Click:Connect(function()
 	PlayClick()
@@ -3023,7 +3000,6 @@ ThemeObjects.PlayerTP.BindButton.MouseButton1Click:Connect(function()
 	end)
 end)
 
-
 local PlayerScroll = Instance.new("ScrollingFrame")
 PlayerScroll.Name = "PlayerScroll"
 PlayerScroll.Size = UDim2.new(1, -8, 1, -40)
@@ -3091,9 +3067,9 @@ ThemeObjects.WaypointUI.AddButton.BorderSizePixel = 0
 ThemeObjects.WaypointUI.AddButton.Text = "Select Part"
 ThemeObjects.WaypointUI.AddButton.Font = Enum.Font.GothamBold
 ThemeObjects.WaypointUI.AddButton.TextSize = 9
-ThemeObjects.WaypointUI.AddButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ThemeObjects.WaypointUI.AddButton.Parent = ThemeObjects.WaypointUI.Frame
 table.insert(ThemeObjects.Backgrounds, ThemeObjects.WaypointUI.AddButton)
+table.insert(ThemeObjects.Texts, ThemeObjects.WaypointUI.AddButton)
 Instance.new("UICorner", ThemeObjects.WaypointUI.AddButton).CornerRadius = UDim.new(0, 5)
 
 ThemeObjects.WaypointUI.CurrentButton = Instance.new("TextButton")
@@ -3105,9 +3081,9 @@ ThemeObjects.WaypointUI.CurrentButton.BorderSizePixel = 0
 ThemeObjects.WaypointUI.CurrentButton.Text = "Set Here"
 ThemeObjects.WaypointUI.CurrentButton.Font = Enum.Font.GothamBold
 ThemeObjects.WaypointUI.CurrentButton.TextSize = 9
-ThemeObjects.WaypointUI.CurrentButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ThemeObjects.WaypointUI.CurrentButton.Parent = ThemeObjects.WaypointUI.Frame
 table.insert(ThemeObjects.Backgrounds, ThemeObjects.WaypointUI.CurrentButton)
+table.insert(ThemeObjects.Texts, ThemeObjects.WaypointUI.CurrentButton)
 Instance.new("UICorner", ThemeObjects.WaypointUI.CurrentButton).CornerRadius = UDim.new(0, 5)
 
 ThemeObjects.WaypointUI.List = Instance.new("ScrollingFrame")
@@ -3177,9 +3153,6 @@ function ThemeObjects.WaypointUI.Save()
 end
 
 function ThemeObjects.WaypointUI.Refresh()
-	if not (ThemeObjects.WaypointUI and ThemeObjects.WaypointUI.List and ThemeObjects.WaypointUI.Layout and ThemeObjects.WaypointUI.Waypoints) then
-		return
-	end
 	for _, child in ipairs(ThemeObjects.WaypointUI.List:GetChildren()) do
 		if child:IsA("Frame") then child:Destroy() end
 	end
@@ -3205,6 +3178,7 @@ function ThemeObjects.WaypointUI.Refresh()
 		waypointButton.TextXAlignment = Enum.TextXAlignment.Left
 		waypointButton.Parent = waypointRow
 		table.insert(ThemeObjects.Backgrounds, waypointButton)
+		table.insert(ThemeObjects.Accents, waypointButton)
 		Instance.new("UICorner", waypointButton).CornerRadius = UDim.new(0, 4)
 
 		local editButton = Instance.new("TextButton")
@@ -3253,14 +3227,15 @@ function ThemeObjects.WaypointUI.Refresh()
 			editBox.BorderSizePixel = 0
 			editBox.Text = waypoint.Name or "Waypoint"
 			editBox.PlaceholderText = "Waypoint name..."
-			editBox.PlaceholderColor3 = Color3.fromRGB(225, 225, 225)
+			editBox.PlaceholderColor3 = InactiveTextColor()
 			editBox.ClearTextOnFocus = false
 			editBox.Font = waypointButton.Font
 			editBox.TextSize = waypointButton.TextSize
 			editBox.TextXAlignment = Enum.TextXAlignment.Center
 			editBox.TextWrapped = false
-			editBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+			editBox.TextColor3 = AccentColor
 			editBox.Parent = waypointRow
+			table.insert(ThemeObjects.Accents, editBox)
 			Instance.new("UICorner", editBox).CornerRadius = UDim.new(0, 4)
 			editBox.FocusLost:Connect(function()
 				local newName = editBox.Text:match("^%s*(.-)%s*$")
@@ -3283,9 +3258,6 @@ function ThemeObjects.WaypointUI.Refresh()
 end
 
 ThemeObjects.PlayerTP.RefreshWaypoints = function()
-	if not (ThemeObjects.PlayerTP and ThemeObjects.PlayerTP.WaypointScroll and ThemeObjects.PlayerTP.WaypointSearch and ThemeObjects.WaypointUI and ThemeObjects.WaypointUI.Waypoints) then
-		return
-	end
 	for _, child in ipairs(ThemeObjects.PlayerTP.WaypointScroll:GetChildren()) do
 		if child:IsA("Frame") then child:Destroy() end
 	end
@@ -3382,7 +3354,7 @@ ThemeObjects.PlayerTP.RefreshWaypoints = function()
 				editBox.ClearTextOnFocus = false
 				editBox.Font = Enum.Font.GothamBold
 				editBox.TextSize = 10
-				editBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+				editBox.TextColor3 = AccentColor
 				editBox.Parent = waypointRow
 				Instance.new("UICorner", editBox).CornerRadius = UDim.new(0, 4)
 				editBox.FocusLost:Connect(function()
@@ -3403,7 +3375,6 @@ ThemeObjects.PlayerTP.RefreshWaypoints = function()
 	end
 	ThemeObjects.PlayerTP.WaypointScroll.CanvasSize = UDim2.new(0, 0, 0, ThemeObjects.PlayerTP.WaypointLayout.AbsoluteContentSize.Y + 2)
 end
-
 
 ThemeObjects.ExtrasFeature.AddWaypoint = function(part)
 	if not part or not part:IsA("BasePart") then return end
@@ -3484,6 +3455,7 @@ local function UpdatePlayerList()
 		pName.TextColor3 = Color3.fromRGB(255, 255, 255)
 		pName.TextXAlignment = Enum.TextXAlignment.Left
 		pName.Parent = pFrame
+		table.insert(ThemeObjects.Texts, pName)
 
 		local tpBtn = Instance.new("TextButton")
 		tpBtn.Size = UDim2.new(0, 42, 0, 22)
@@ -3667,7 +3639,6 @@ local function StartCoinFarm()
 end
 
 local function ToggleCoinFarm()
-	PlayFeatureToggle()
 	CoinFarmEnabled = not CoinFarmEnabled
 	CoinFarmToggle.Text = CoinFarmEnabled and "On" or "Off"
 	CoinFarmTitle.TextColor3 = CoinFarmEnabled and AccentColor or InactiveTextColor()
@@ -3867,7 +3838,6 @@ end)
 
 AutoGunToggle.MouseButton1Click:Connect(function()
 	PlayClick()
-	PlayFeatureToggle()
 	AutoGunPickupEnabled = not AutoGunPickupEnabled
 	AutoGunToggle.Text = AutoGunPickupEnabled and "On" or "Off"
 	AutoGunTitle.TextColor3 = AutoGunPickupEnabled and AccentColor or InactiveTextColor()
@@ -4035,7 +4005,6 @@ end
 
 MurdererESPBtn.MouseButton1Click:Connect(function()
 	PlayClick()
-	PlayFeatureToggle()
 	MurdererRoleESPEnabled = not MurdererRoleESPEnabled
 	MurdererESPBtn.Text = MurdererRoleESPEnabled and "ON" or "ESP"
 	UpdateRoleHighlights()
@@ -4043,7 +4012,6 @@ end)
 
 SheriffESPBtn.MouseButton1Click:Connect(function()
 	PlayClick()
-	PlayFeatureToggle()
 	SheriffRoleESPEnabled = not SheriffRoleESPEnabled
 	SheriffESPBtn.Text = SheriffRoleESPEnabled and "ON" or "ESP"
 	GunDropESP.Enabled = SheriffRoleESPEnabled
@@ -4145,7 +4113,6 @@ end
 
 KillToggle.MouseButton1Click:Connect(function()
 	PlayClick()
-	PlayFeatureToggle()
 	SetKillEnabled(not KillEnabled)
 end)
 
@@ -4289,10 +4256,10 @@ do
 		return row
 	end
 
-	local stabRow = CreateMM2ControlRow("AutoStabRow", 1, -18, 0, 4, 4, 38)
-	local shootRow = CreateMM2ControlRow("AutoShootRow", 1, -18, 0, 4, 48, 38)
-	local gunRow = CreateMM2ControlRow("AutoGunRow", 1, -18, 0, 4, 92, 38)
-	local coinRow = CreateMM2ControlRow("CoinFarmRow", 1, -18, 0, 4, 146, 48)
+	local stabRow = CreateMM2ControlRow("AutoStabRow", 1, -8, 0, 4, 4, 38)
+	local shootRow = CreateMM2ControlRow("AutoShootRow", 1, -8, 0, 4, 48, 38)
+	local gunRow = CreateMM2ControlRow("AutoGunRow", 1, -8, 0, 4, 92, 38)
+	local coinRow = CreateMM2ControlRow("CoinFarmRow", 1, -8, 0, 4, 146, 48)
 
 	local function PlaceMM2Control(title, toggle, row, fullWidth)
 		title.Size = fullWidth and UDim2.new(0, 130, 0, 24) or UDim2.new(0, 82, 0, 22)
@@ -4353,7 +4320,6 @@ do
 	end
 
 	local function SetAutoShootEnabled(enabled)
-		PlayFeatureToggle()
 		autoShootEnabled = enabled
 		autoShootToggle.Text = enabled and "On" or "Off"
 		autoShootTitle.TextColor3 = enabled and Color3.fromRGB(90, 150, 255) or InactiveTextColor()
@@ -4438,12 +4404,12 @@ end
 do
 	for _, cardInfo in ipairs({
 		{Name = "SpeedMovementCard", X = 4, Y = 4},
-		{Name = "FlyMovementCard", X = 4, Y = 60},
-		{Name = "NoclipMovementCard", X = 4, Y = 116},
+		{Name = "FlyMovementCard", X = 4, Y = 46},
+		{Name = "NoclipMovementCard", X = 4, Y = 88},
 	}) do
 		local card = Instance.new("Frame")
 		card.Name = cardInfo.Name
-		card.Size = UDim2.new(1, -8, 0, 50)
+		card.Size = UDim2.new(1, -8, 0, 34)
 		card.Position = UDim2.new(0, cardInfo.X, 0, cardInfo.Y)
 		card.BackgroundColor3 = Color3.fromRGB(38, 38, 52)
 		card.BackgroundTransparency = 0.92
@@ -4456,7 +4422,7 @@ end
 
 ThemeObjects.FreeCam.Card = Instance.new("Frame")
 ThemeObjects.FreeCam.Card.Name = "FreeCamCameraCard"
-ThemeObjects.FreeCam.Card.Size = UDim2.new(1, -8, 0, 50)
+ThemeObjects.FreeCam.Card.Size = UDim2.new(1, -8, 0, 34)
 ThemeObjects.FreeCam.Card.Position = UDim2.new(0, 4, 0, 4)
 ThemeObjects.FreeCam.Card.BackgroundColor3 = Color3.fromRGB(38, 38, 52)
 ThemeObjects.FreeCam.Card.BackgroundTransparency = 0.92
@@ -4467,8 +4433,8 @@ Instance.new("UICorner", ThemeObjects.FreeCam.Card).CornerRadius = UDim.new(0, 6
 
 ThemeObjects.CameraFOV = {Card = Instance.new("Frame")}
 ThemeObjects.CameraFOV.Card.Name = "FOVCameraCard"
-ThemeObjects.CameraFOV.Card.Size = UDim2.new(1, -8, 0, 50)
-ThemeObjects.CameraFOV.Card.Position = UDim2.new(0, 4, 0, 60)
+ThemeObjects.CameraFOV.Card.Size = UDim2.new(1, -8, 0, 34)
+ThemeObjects.CameraFOV.Card.Position = UDim2.new(0, 4, 0, 46)
 ThemeObjects.CameraFOV.Card.BackgroundColor3 = Color3.fromRGB(38, 38, 52)
 ThemeObjects.CameraFOV.Card.BackgroundTransparency = 0.92
 ThemeObjects.CameraFOV.Card.BorderSizePixel = 0
@@ -4678,58 +4644,58 @@ do
 	local noclipCard = MovementPage:FindFirstChild("NoclipMovementCard")
 
 	SpeedTitle.Size = UDim2.new(0, 60, 0, 20)
-	SpeedTitle.Position = UDim2.new(0, 8, 0, 5)
+	SpeedTitle.Position = UDim2.new(0, 8, 0.5, -10)
 	SpeedTitle.Parent = speedCard
 	SpeedInput.Size = UDim2.new(0, 44, 0, 20)
-	SpeedInput.Position = UDim2.new(1, -146, 0, 25)
+	SpeedInput.Position = UDim2.new(0, 74, 0.5, -10)
 	SpeedInput.TextSize = 9
 	SpeedInput.Parent = speedCard
 	SpeedToggleBtn.Size = UDim2.new(0, 44, 0, 20)
-	SpeedToggleBtn.Position = UDim2.new(1, -96, 0, 25)
+	SpeedToggleBtn.Position = UDim2.new(1, -96, 0.5, -10)
 	SpeedToggleBtn.TextSize = 9
 	SpeedToggleBtn.Parent = speedCard
 	SpeedBindBtn.Size = UDim2.new(0, 44, 0, 20)
-	SpeedBindBtn.Position = UDim2.new(1, -48, 0, 25)
+	SpeedBindBtn.Position = UDim2.new(1, -48, 0.5, -10)
 	SpeedBindBtn.TextSize = 8
 	SpeedBindBtn.Parent = speedCard
 
 	FlyTitle.Size = UDim2.new(0, 60, 0, 20)
-	FlyTitle.Position = UDim2.new(0, 8, 0, 5)
+	FlyTitle.Position = UDim2.new(0, 8, 0.5, -10)
 	FlyTitle.Parent = flyCard
 	FlyInput.Size = UDim2.new(0, 44, 0, 20)
-	FlyInput.Position = UDim2.new(1, -146, 0, 25)
+	FlyInput.Position = UDim2.new(0, 74, 0.5, -10)
 	FlyInput.TextSize = 9
 	FlyInput.Parent = flyCard
 	FlyToggleBtn.Size = UDim2.new(0, 44, 0, 20)
-	FlyToggleBtn.Position = UDim2.new(1, -96, 0, 25)
+	FlyToggleBtn.Position = UDim2.new(1, -96, 0.5, -10)
 	FlyToggleBtn.TextSize = 9
 	FlyToggleBtn.Parent = flyCard
 	FlyBindBtn.Size = UDim2.new(0, 44, 0, 20)
-	FlyBindBtn.Position = UDim2.new(1, -48, 0, 25)
+	FlyBindBtn.Position = UDim2.new(1, -48, 0.5, -10)
 	FlyBindBtn.TextSize = 8
 	FlyBindBtn.Parent = flyCard
 
 	NoclipTitle.Size = UDim2.new(0, 80, 0, 20)
-	NoclipTitle.Position = UDim2.new(0, 8, 0, 5)
+	NoclipTitle.Position = UDim2.new(0, 8, 0.5, -10)
 	NoclipTitle.TextXAlignment = Enum.TextXAlignment.Left
 	NoclipTitle.Parent = noclipCard
 	NoclipToggleBtn.Size = UDim2.new(0, 44, 0, 20)
-	NoclipToggleBtn.Position = UDim2.new(1, -96, 0, 25)
+	NoclipToggleBtn.Position = UDim2.new(1, -96, 0.5, -10)
 	NoclipToggleBtn.TextSize = 9
 	NoclipToggleBtn.Parent = noclipCard
 	NoclipBindBtn.Size = UDim2.new(0, 44, 0, 20)
-	NoclipBindBtn.Position = UDim2.new(1, -48, 0, 25)
+	NoclipBindBtn.Position = UDim2.new(1, -48, 0.5, -10)
 	NoclipBindBtn.TextSize = 8
 	NoclipBindBtn.Parent = noclipCard
 
 	ThemeObjects.FreeCam.Title.Size = UDim2.new(0, 80, 0, 20)
-	ThemeObjects.FreeCam.Title.Position = UDim2.new(0, 8, 0, 5)
+	ThemeObjects.FreeCam.Title.Position = UDim2.new(0, 8, 0.5, -10)
 	ThemeObjects.FreeCam.Title.Parent = ThemeObjects.FreeCam.Card
 	ThemeObjects.FreeCam.Toggle.Size = UDim2.new(0, 44, 0, 20)
-	ThemeObjects.FreeCam.Toggle.Position = UDim2.new(1, -96, 0, 25)
+	ThemeObjects.FreeCam.Toggle.Position = UDim2.new(1, -96, 0.5, -10)
 	ThemeObjects.FreeCam.Toggle.Parent = ThemeObjects.FreeCam.Card
 	ThemeObjects.FreeCam.Bind.Size = UDim2.new(0, 44, 0, 20)
-	ThemeObjects.FreeCam.Bind.Position = UDim2.new(1, -48, 0, 25)
+	ThemeObjects.FreeCam.Bind.Position = UDim2.new(1, -48, 0.5, -10)
 	ThemeObjects.FreeCam.Bind.Parent = ThemeObjects.FreeCam.Card
 end
 
@@ -4737,7 +4703,7 @@ do
 	ThemeObjects.CameraFOV.Value = workspace.CurrentCamera and workspace.CurrentCamera.FieldOfView or 70
 	ThemeObjects.CameraFOV.Title = Instance.new("TextLabel")
 	ThemeObjects.CameraFOV.Title.Size = UDim2.new(0, 48, 0, 20)
-	ThemeObjects.CameraFOV.Title.Position = UDim2.new(0, 8, 0, 5)
+	ThemeObjects.CameraFOV.Title.Position = UDim2.new(0, 8, 0.5, -10)
 	ThemeObjects.CameraFOV.Title.BackgroundTransparency = 1
 	ThemeObjects.CameraFOV.Title.Text = "FOV:"
 	ThemeObjects.CameraFOV.Title.Font = Enum.Font.GothamBold
@@ -4748,7 +4714,7 @@ do
 
 	ThemeObjects.CameraFOV.Input = Instance.new("TextBox")
 	ThemeObjects.CameraFOV.Input.Size = UDim2.new(0, 60, 0, 20)
-	ThemeObjects.CameraFOV.Input.Position = UDim2.new(1, -126, 0, 25)
+	ThemeObjects.CameraFOV.Input.Position = UDim2.new(0, 62, 0.5, -10)
 	ThemeObjects.CameraFOV.Input.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 	ThemeObjects.CameraFOV.Input.BackgroundTransparency = 0.8
 	ThemeObjects.CameraFOV.Input.BorderSizePixel = 0
@@ -4763,7 +4729,7 @@ do
 
 	ThemeObjects.CameraFOV.Reset = Instance.new("TextButton")
 	ThemeObjects.CameraFOV.Reset.Size = UDim2.new(0, 54, 0, 20)
-	ThemeObjects.CameraFOV.Reset.Position = UDim2.new(1, -58, 0, 25)
+	ThemeObjects.CameraFOV.Reset.Position = UDim2.new(1, -58, 0.5, -10)
 	ThemeObjects.CameraFOV.Reset.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 	ThemeObjects.CameraFOV.Reset.BackgroundTransparency = 0.8
 	ThemeObjects.CameraFOV.Reset.BorderSizePixel = 0
@@ -4834,7 +4800,6 @@ SetupBinding(AutoLockBindBtn, "AutoLock")
 SetupBinding(ESPBindBtn, "ESP")
 
 local function ToggleSpeed()
-	PlayFeatureToggle()
 	SpeedEnabled = not SpeedEnabled
 	SpeedToggleBtn.Text = SpeedEnabled and "On" or "Off"
 	SpeedTitle.TextColor3 = SpeedEnabled and AccentColor or InactiveTextColor()
@@ -4842,7 +4807,6 @@ end
 SpeedToggleBtn.MouseButton1Click:Connect(function() PlayClick() ToggleSpeed() end)
 
 local function ToggleNoclip()
-	PlayFeatureToggle()
 	NoclipEnabled = not NoclipEnabled
 	NoclipToggleBtn.Text = NoclipEnabled and "On" or "Off"
 	NoclipTitle.TextColor3 = NoclipEnabled and AccentColor or InactiveTextColor()
@@ -4917,7 +4881,6 @@ function ThemeObjects.FreeCam.Disable()
 end
 
 function ThemeObjects.FreeCam.ToggleState()
-	PlayFeatureToggle()
 	if ThemeObjects.FreeCam.Enabled then ThemeObjects.FreeCam.Disable() else ThemeObjects.FreeCam.Enable() end
 end
 
@@ -4956,7 +4919,6 @@ Connections.FreeCam = RunService.RenderStepped:Connect(function(deltaTime)
 end)
 
 local function ToggleFly()
-	PlayFeatureToggle()
 	FlyEnabled = not FlyEnabled
 	FlyToggleBtn.Text = FlyEnabled and "On" or "Off"
 	FlyTitle.TextColor3 = FlyEnabled and AccentColor or InactiveTextColor()
@@ -5183,14 +5145,13 @@ SettingsBtn.MouseButton1Click:Connect(function()
 end)
 
 local function ToggleGUI()
-	minimized = not minimized
-	PlayMinimizeSound()
+	minimized = not minimized PlaySwoosh()
 	if minimized and settingsOpen then ToggleSettings(true) end
 	TabScroll.Visible = not minimized
 	if MainPatternLines.Container then
 		MainPatternLines.Container.Visible = true
 		MainPatternLines.Container.Size = UDim2.new(0, 66, 0, 22)
-		MainPatternLines.Container.Position = minimized and UDim2.new(0, 8, 0, 6) or UDim2.new(0.5, -33, 0, 5)
+		MainPatternLines.Container.Position = minimized and UDim2.new(0, 8, 0, 6) or UDim2.new(0, 200, 0, 5)
 	end
 	if not minimized then SettingsBtn.Visible = true end
 	SettingsBtn.Active = not minimized
@@ -5204,25 +5165,8 @@ local function ToggleGUI()
 			if minimized then SettingsBtn.Visible = false end
 		end)
 	end
-	local tweenInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
 	local targetSize = minimized and UDim2.new(0, 170, 0, 34) or UDim2.new(0, 460, 0, 300)
-	if minimized then
-		local currentSize = MainFrame.AbsoluteSize
-		MainFrame.Position = UDim2.new(MainFrame.Position.X.Scale, MainFrame.Position.X.Offset + (currentSize.X * (1 - MainFrame.AnchorPoint.X)), MainFrame.Position.Y.Scale, MainFrame.Position.Y.Offset + (currentSize.Y * (1 - MainFrame.AnchorPoint.Y)))
-		MainFrame.AnchorPoint = Vector2.new(1, 1)
-		TweenService:Create(MainFrame, tweenInfo, {Size = targetSize}):Play()
-	else
-		local bottomRight = MainFrame.Position
-		MainFrame.AnchorPoint = Vector2.new(1, 1)
-		local tween = TweenService:Create(MainFrame, tweenInfo, {Size = targetSize})
-		tween:Play()
-		tween.Completed:Connect(function()
-			if not minimized then
-				MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-				MainFrame.Position = UDim2.new(bottomRight.X.Scale, bottomRight.X.Offset - (MainFrame.AbsoluteSize.X * 0.5), bottomRight.Y.Scale, bottomRight.Y.Offset - (MainFrame.AbsoluteSize.Y * 0.5))
-			end
-		end)
-	end
+	TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = targetSize}):Play()
 	MiniButton.Text = minimized and "+" or "-"
 end
 MiniButton.MouseButton1Click:Connect(ToggleGUI)
