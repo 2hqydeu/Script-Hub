@@ -219,24 +219,27 @@ ClickSound.Volume = 0.5
 ClickSound.Parent = MainFrame
 
 local SwooshSound = Instance.new("Sound")
-SwooshSound.SoundId = "rbxassetid://107710687218353"
-SwooshSound.Volume = 0.6
+SwooshSound.SoundId = "rbxassetid://132442985525251"
+SwooshSound.Volume = 0.65
 SwooshSound.Parent = MainFrame
 
-local FeatureToggleSound = Instance.new("Sound")
-FeatureToggleSound.SoundId = "rbxassetid://87437544236708"
-FeatureToggleSound.Volume = 0.65
-FeatureToggleSound.Parent = MainFrame
+local ClickSoundId = "rbxassetid://6895079853"
+local FeatureToggleSoundId = "rbxassetid://87437544236708"
 
-local MinimizeSound = Instance.new("Sound")
-MinimizeSound.SoundId = "rbxassetid://132442985525251"
-MinimizeSound.Volume = 0.65
-MinimizeSound.Parent = MainFrame
-
-local function PlayClick() ClickSound:Play() end
-local function PlaySwoosh() SwooshSound:Play() end
-local function PlayFeatureToggle() FeatureToggleSound:Play() end
-local function PlayMinimizeSound() MinimizeSound:Play() end
+local function PlayClick()
+	pcall(function()
+		ClickSound.SoundId = ClickSoundId
+		ClickSound:Play()
+	end)
+end
+local function PlaySwoosh() pcall(function() SwooshSound:Play() end) end
+local function PlayFeatureToggle()
+	pcall(function()
+		ClickSound.SoundId = FeatureToggleSoundId
+		ClickSound:Play()
+	end)
+end
+local function PlayMinimizeSound() PlaySwoosh() end
 
 -- Theme Management
 local ThemeObjects = { Backgrounds = {}, Texts = {}, Accents = {}, AccentBackgrounds = {}, StateTexts = {} }
@@ -246,11 +249,9 @@ ThemeObjects.ApplyMainGradient = function(intensity)
 	local bgColor = FrameThemeColor
 	MainTextureGradient.Color = ColorSequence.new({
 		ColorSequenceKeypoint.new(0, Color3.new(0, 0, 0)),
-		ColorSequenceKeypoint.new(0.08, Color3.new(0, 0, 0)),
 		ColorSequenceKeypoint.new(0.18, bgColor:Lerp(AccentColor, intensity * 0.38)),
 		ColorSequenceKeypoint.new(0.48, bgColor:Lerp(AccentColor, intensity)),
 		ColorSequenceKeypoint.new(0.73, bgColor:Lerp(AccentColor, intensity * 0.72)),
-		ColorSequenceKeypoint.new(0.92, Color3.new(0, 0, 0)),
 		ColorSequenceKeypoint.new(1, Color3.new(0, 0, 0)),
 	})
 	if TargetTextureGradient then TargetTextureGradient.Color = MainTextureGradient.Color end
@@ -5188,25 +5189,9 @@ local function ToggleGUI()
 			if minimized then SettingsBtn.Visible = false end
 		end)
 	end
-	local tweenInfo = TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
 	local targetSize = minimized and UDim2.new(0, 170, 0, 34) or UDim2.new(0, 460, 0, 300)
-	if minimized then
-		local currentSize = MainFrame.AbsoluteSize
-		MainFrame.Position = UDim2.new(MainFrame.Position.X.Scale, MainFrame.Position.X.Offset + (currentSize.X * (1 - MainFrame.AnchorPoint.X)), MainFrame.Position.Y.Scale, MainFrame.Position.Y.Offset + (currentSize.Y * (1 - MainFrame.AnchorPoint.Y)))
-		MainFrame.AnchorPoint = Vector2.new(1, 1)
-		TweenService:Create(MainFrame, tweenInfo, {Size = targetSize}):Play()
-	else
-		local bottomRight = MainFrame.Position
-		MainFrame.AnchorPoint = Vector2.new(1, 1)
-		local tween = TweenService:Create(MainFrame, tweenInfo, {Size = targetSize})
-		tween:Play()
-		tween.Completed:Connect(function()
-			if not minimized then
-				MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-				MainFrame.Position = UDim2.new(bottomRight.X.Scale, bottomRight.X.Offset - (MainFrame.AbsoluteSize.X * 0.5), bottomRight.Y.Scale, bottomRight.Y.Offset - (MainFrame.AbsoluteSize.Y * 0.5))
-			end
-		end)
-	end
+	MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+	TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = targetSize}):Play()
 	MiniButton.Text = minimized and "+" or "-"
 end
 MiniButton.MouseButton1Click:Connect(ToggleGUI)
