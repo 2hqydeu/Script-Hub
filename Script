@@ -1,4 +1,3 @@
-local __hq_ok, __hq_err = xpcall(function()
 -- Services
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -244,11 +243,11 @@ ThemeObjects.ApplyMainGradient = function(intensity)
 	intensity = math.clamp(intensity or 0.5, 0, 0.5)
 	local bgColor = FrameThemeColor
 	MainTextureGradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.new(0, 0, 0)),
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(16, 16, 22)),
 		ColorSequenceKeypoint.new(0.18, bgColor:Lerp(AccentColor, intensity * 0.38)),
 		ColorSequenceKeypoint.new(0.48, bgColor:Lerp(AccentColor, intensity)),
 		ColorSequenceKeypoint.new(0.73, bgColor:Lerp(AccentColor, intensity * 0.72)),
-		ColorSequenceKeypoint.new(1, Color3.new(0, 0, 0)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(16, 16, 22)),
 	})
 	if TargetTextureGradient then TargetTextureGradient.Color = MainTextureGradient.Color end
 	if ThemeObjects.PlayerTP and ThemeObjects.PlayerTP.Gradient then ThemeObjects.PlayerTP.Gradient.Color = MainTextureGradient.Color end
@@ -2753,9 +2752,6 @@ do
 end
 
 ThemeObjects.PlayerTP.Refresh = function()
-	if not ThemeObjects.PlayerTP or not ThemeObjects.PlayerTP.Scroll or not ThemeObjects.PlayerTP.Search or not ThemeObjects.PlayerTP.Layout then
-		return
-	end
 	for _, child in ipairs(ThemeObjects.PlayerTP.Scroll:GetChildren()) do
 		if child:IsA("Frame") then child:Destroy() end
 	end
@@ -3157,9 +3153,6 @@ function ThemeObjects.WaypointUI.Save()
 end
 
 function ThemeObjects.WaypointUI.Refresh()
-	if not ThemeObjects.WaypointUI or not ThemeObjects.WaypointUI.List or not ThemeObjects.WaypointUI.Layout then
-		return
-	end
 	for _, child in ipairs(ThemeObjects.WaypointUI.List:GetChildren()) do
 		if child:IsA("Frame") then child:Destroy() end
 	end
@@ -3260,21 +3253,11 @@ function ThemeObjects.WaypointUI.Refresh()
 		end)
 	end
 	ThemeObjects.WaypointUI.List.CanvasSize = UDim2.new(0, 0, 0, ThemeObjects.WaypointUI.Layout.AbsoluteContentSize.Y + 8)
-	if ThemeObjects.PlayerTP and ThemeObjects.PlayerTP.WaypointScroll and ThemeObjects.PlayerTP.RefreshWaypoints then
-		ThemeObjects.PlayerTP.RefreshWaypoints()
-	end
+	if ThemeObjects.PlayerTP and ThemeObjects.PlayerTP.RefreshWaypoints then ThemeObjects.PlayerTP.RefreshWaypoints() end
 	UpdateTheme(true)
 end
 
 ThemeObjects.PlayerTP.RefreshWaypoints = function()
-	if not ThemeObjects.PlayerTP
-		or not ThemeObjects.PlayerTP.WaypointScroll
-		or not ThemeObjects.PlayerTP.WaypointSearch
-		or not ThemeObjects.PlayerTP.WaypointLayout
-		or not ThemeObjects.WaypointUI
-		or type(ThemeObjects.WaypointUI.Waypoints) ~= "table" then
-		return
-	end
 	for _, child in ipairs(ThemeObjects.PlayerTP.WaypointScroll:GetChildren()) do
 		if child:IsA("Frame") then child:Destroy() end
 	end
@@ -6002,80 +5985,35 @@ UserInputService.InputChanged:Connect(function(input) if dragging and (input.Use
 
 -- FLY-IN TITLE SEQUENCE
 task.spawn(function()
-	local ok = pcall(function()
-		SplashFrame.Rotation = -540
-		local spinIn = TweenService:Create(SplashFrame, TweenInfo.new(0.55, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-			Size = UDim2.new(0, 200, 0, 200),
-			Position = UDim2.new(0.5, 0, 0.5, 0),
-			Rotation = 0,
-		})
-		spinIn:Play()
-		spinIn.Completed:Wait()
+	SplashFrame.Rotation = -540
+	local spinIn = TweenService:Create(SplashFrame, TweenInfo.new(0.55, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+		Size = UDim2.new(0, 200, 0, 200),
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+		Rotation = 0,
+	})
+	spinIn:Play()
+	spinIn.Completed:Wait()
 
-		local revealTitle = TweenService:Create(SplashText, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-			TextTransparency = 0,
-			TextStrokeTransparency = 0.5,
-		})
-		revealTitle:Play()
-		revealTitle.Completed:Wait()
-		task.wait(0.5)
+	local revealTitle = TweenService:Create(SplashText, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		TextTransparency = 0,
+		TextStrokeTransparency = 0.5,
+	})
+	revealTitle:Play()
+	revealTitle.Completed:Wait()
+	task.wait(0.5)
 
-		local splashStroke = SplashFrame:FindFirstChildOfClass("UIStroke")
-		if splashStroke then
-			TweenService:Create(splashStroke, TweenInfo.new(0.4), {Transparency = 1}):Play()
-		end
-		TweenService:Create(SplashText, TweenInfo.new(0.25), {TextTransparency = 1, TextStrokeTransparency = 1}):Play()
-		local spinOut = TweenService:Create(SplashFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
-			Size = UDim2.new(0, 0, 0, 0),
-			Rotation = 540,
-			BackgroundTransparency = 1,
-		})
-		spinOut:Play()
-		spinOut.Completed:Wait()
-	end)
-	if SplashFrame and SplashFrame.Parent then
-		SplashFrame:Destroy()
+	local splashStroke = SplashFrame:FindFirstChildOfClass("UIStroke")
+	if splashStroke then
+		TweenService:Create(splashStroke, TweenInfo.new(0.4), {Transparency = 1}):Play()
 	end
+	TweenService:Create(SplashText, TweenInfo.new(0.25), {TextTransparency = 1, TextStrokeTransparency = 1}):Play()
+	local spinOut = TweenService:Create(SplashFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+		Size = UDim2.new(0, 0, 0, 0),
+		Rotation = 540,
+		BackgroundTransparency = 1,
+	})
+	spinOut:Play()
+	spinOut.Completed:Wait()
+	SplashFrame:Destroy()
 	MainFrame.Visible = true
 end)
-
-task.delay(3, function()
-	if MainFrame and MainFrame.Parent and not MainFrame.Visible then
-		if SplashFrame and SplashFrame.Parent then SplashFrame:Destroy() end
-		MainFrame.Visible = true
-	end
-end)
-end, function(err)
-	return (debug and debug.traceback and debug.traceback(tostring(err), 2)) or tostring(err)
-end)
-
-if not __hq_ok then
-	pcall(function()
-		local coreGui = game:GetService("CoreGui")
-		local old = coreGui:FindFirstChild("HqydeuLoaderError")
-		if old then old:Destroy() end
-		local gui = Instance.new("ScreenGui")
-		gui.Name = "HqydeuLoaderError"
-		gui.ResetOnSpawn = false
-		gui.Parent = coreGui
-		local frame = Instance.new("Frame")
-		frame.Size = UDim2.new(0, 430, 0, 150)
-		frame.Position = UDim2.new(0.5, -215, 0.5, -75)
-		frame.BackgroundColor3 = Color3.fromRGB(35, 12, 16)
-		frame.BorderSizePixel = 0
-		frame.Parent = gui
-		Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
-		local label = Instance.new("TextLabel")
-		label.Size = UDim2.new(1, -18, 1, -18)
-		label.Position = UDim2.new(0, 9, 0, 9)
-		label.BackgroundTransparency = 1
-		label.Text = "Script Hub startup error:\n" .. tostring(__hq_err)
-		label.TextColor3 = Color3.fromRGB(255, 105, 105)
-		label.TextXAlignment = Enum.TextXAlignment.Left
-		label.TextYAlignment = Enum.TextYAlignment.Top
-		label.TextWrapped = true
-		label.TextSize = 12
-		label.Font = Enum.Font.Code
-		label.Parent = frame
-	end)
-end
