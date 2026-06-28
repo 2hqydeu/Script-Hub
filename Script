@@ -2753,6 +2753,9 @@ do
 end
 
 ThemeObjects.PlayerTP.Refresh = function()
+	if not ThemeObjects.PlayerTP or not ThemeObjects.PlayerTP.Scroll or not ThemeObjects.PlayerTP.Search or not ThemeObjects.PlayerTP.Layout then
+		return
+	end
 	for _, child in ipairs(ThemeObjects.PlayerTP.Scroll:GetChildren()) do
 		if child:IsA("Frame") then child:Destroy() end
 	end
@@ -3154,6 +3157,9 @@ function ThemeObjects.WaypointUI.Save()
 end
 
 function ThemeObjects.WaypointUI.Refresh()
+	if not ThemeObjects.WaypointUI or not ThemeObjects.WaypointUI.List or not ThemeObjects.WaypointUI.Layout then
+		return
+	end
 	for _, child in ipairs(ThemeObjects.WaypointUI.List:GetChildren()) do
 		if child:IsA("Frame") then child:Destroy() end
 	end
@@ -3254,11 +3260,21 @@ function ThemeObjects.WaypointUI.Refresh()
 		end)
 	end
 	ThemeObjects.WaypointUI.List.CanvasSize = UDim2.new(0, 0, 0, ThemeObjects.WaypointUI.Layout.AbsoluteContentSize.Y + 8)
-	if ThemeObjects.PlayerTP and ThemeObjects.PlayerTP.RefreshWaypoints then ThemeObjects.PlayerTP.RefreshWaypoints() end
+	if ThemeObjects.PlayerTP and ThemeObjects.PlayerTP.WaypointScroll and ThemeObjects.PlayerTP.RefreshWaypoints then
+		ThemeObjects.PlayerTP.RefreshWaypoints()
+	end
 	UpdateTheme(true)
 end
 
 ThemeObjects.PlayerTP.RefreshWaypoints = function()
+	if not ThemeObjects.PlayerTP
+		or not ThemeObjects.PlayerTP.WaypointScroll
+		or not ThemeObjects.PlayerTP.WaypointSearch
+		or not ThemeObjects.PlayerTP.WaypointLayout
+		or not ThemeObjects.WaypointUI
+		or type(ThemeObjects.WaypointUI.Waypoints) ~= "table" then
+		return
+	end
 	for _, child in ipairs(ThemeObjects.PlayerTP.WaypointScroll:GetChildren()) do
 		if child:IsA("Frame") then child:Destroy() end
 	end
