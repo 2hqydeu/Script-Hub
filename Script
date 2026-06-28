@@ -250,6 +250,7 @@ ThemeObjects.ApplyMainGradient = function(intensity)
 		ColorSequenceKeypoint.new(1, bgColor:Lerp(AccentColor, intensity * 0.22)),
 	})
 	if TargetTextureGradient then TargetTextureGradient.Color = MainTextureGradient.Color end
+	if ThemeObjects.PlayerTP and ThemeObjects.PlayerTP.Gradient then ThemeObjects.PlayerTP.Gradient.Color = MainTextureGradient.Color end
 end
 
 local function IsFrameLight()
@@ -333,6 +334,8 @@ local function UpdateTheme(instant)
 				obj.BackgroundTransparency = keepSolid and 0 or 0.8
 			end
 		local target = (obj:IsA("TextButton") or obj:IsA("TextBox") or obj.Name == "TabScroll" or obj.Name == "TargetRow") and secBgColor or bgColor
+			if obj.Name == "PlayerTPFrame" then target = Color3.fromRGB(14, 18, 26)
+			end
 			if obj:IsA("TextButton") and obj.Text == "On" then target = AccentColor end
 			if obj.Name == "DestroyBtn" then target = Color3.fromRGB(125, 35, 40)
 			elseif obj.Name == "ResetCharacterBtn" then target = Color3.fromRGB(125, 88, 18)
@@ -415,6 +418,7 @@ local Flinging = false
 local AntiFlingOriginalCollision = {}
 local FlingMenuKeybind = LoadKeybind("FlingMenu")
 local IsBindingFlingMenu = false
+ThemeObjects.PlayerTP = {Keybind = LoadKeybind("PlayerTPMenu"), Binding = false, Dragging = false}
 local BodyVelocity = nil
 local BodyGyro = nil
 local Connections = {}
@@ -2586,6 +2590,272 @@ end
 
 FlingTargetBtn.MouseButton1Click:Connect(function() PlayClick() ToggleFlingMenu() end)
 
+ThemeObjects.PlayerTP.Frame = Instance.new("Frame")
+ThemeObjects.PlayerTP.Frame.Name = "PlayerTPFrame"
+ThemeObjects.PlayerTP.Frame.Size = UDim2.new(0, 210, 0, 175)
+ThemeObjects.PlayerTP.Frame.Position = UDim2.new(0.5, -105, 0.5, -88)
+ThemeObjects.PlayerTP.Frame.BackgroundColor3 = Color3.fromRGB(14, 18, 26)
+ThemeObjects.PlayerTP.Frame.BackgroundTransparency = 0.18
+ThemeObjects.PlayerTP.Frame.BorderSizePixel = 0
+ThemeObjects.PlayerTP.Frame.Visible = false
+ThemeObjects.PlayerTP.Frame.Parent = ScreenGui
+ThemeObjects.PlayerTP.Scale = Instance.new("UIScale", ThemeObjects.PlayerTP.Frame)
+ThemeObjects.PlayerTP.Scale.Scale = GuiScaleFromValue(GuiSizeValue)
+table.insert(ThemeObjects.Backgrounds, ThemeObjects.PlayerTP.Frame)
+Instance.new("UICorner", ThemeObjects.PlayerTP.Frame).CornerRadius = UDim.new(0, 10)
+
+ThemeObjects.PlayerTP.Gradient = Instance.new("UIGradient")
+ThemeObjects.PlayerTP.Gradient.Rotation = 135
+ThemeObjects.PlayerTP.Gradient.Parent = ThemeObjects.PlayerTP.Frame
+ThemeObjects.PlayerTP.Stroke = Instance.new("UIStroke")
+ThemeObjects.PlayerTP.Stroke.Thickness = 1
+ThemeObjects.PlayerTP.Stroke.Transparency = 0.35
+ThemeObjects.PlayerTP.Stroke.Color = AccentColor
+ThemeObjects.PlayerTP.Stroke.Parent = ThemeObjects.PlayerTP.Frame
+table.insert(ThemeObjects.Accents, ThemeObjects.PlayerTP.Stroke)
+
+ThemeObjects.PlayerTP.Header = Instance.new("TextLabel")
+ThemeObjects.PlayerTP.Header.Size = UDim2.new(1, -34, 0, 28)
+ThemeObjects.PlayerTP.Header.Position = UDim2.new(0, 10, 0, 0)
+ThemeObjects.PlayerTP.Header.BackgroundTransparency = 1
+ThemeObjects.PlayerTP.Header.Text = "Teleport Player"
+ThemeObjects.PlayerTP.Header.Font = Enum.Font.GothamBold
+ThemeObjects.PlayerTP.Header.TextSize = 13
+ThemeObjects.PlayerTP.Header.TextXAlignment = Enum.TextXAlignment.Left
+ThemeObjects.PlayerTP.Header.Parent = ThemeObjects.PlayerTP.Frame
+table.insert(ThemeObjects.Texts, ThemeObjects.PlayerTP.Header)
+
+ThemeObjects.PlayerTP.Close = Instance.new("TextButton")
+ThemeObjects.PlayerTP.Close.Size = UDim2.new(0, 20, 0, 20)
+ThemeObjects.PlayerTP.Close.Position = UDim2.new(1, -26, 0, 4)
+ThemeObjects.PlayerTP.Close.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+ThemeObjects.PlayerTP.Close.BackgroundTransparency = 0.8
+ThemeObjects.PlayerTP.Close.BorderSizePixel = 0
+ThemeObjects.PlayerTP.Close.Text = "×"
+ThemeObjects.PlayerTP.Close.Font = Enum.Font.GothamBold
+ThemeObjects.PlayerTP.Close.Parent = ThemeObjects.PlayerTP.Frame
+table.insert(ThemeObjects.Backgrounds, ThemeObjects.PlayerTP.Close)
+table.insert(ThemeObjects.Texts, ThemeObjects.PlayerTP.Close)
+Instance.new("UICorner", ThemeObjects.PlayerTP.Close).CornerRadius = UDim.new(0, 4)
+
+ThemeObjects.PlayerTP.PlayersTab = Instance.new("TextButton")
+ThemeObjects.PlayerTP.PlayersTab.Size = UDim2.new(0, 80, 0, 20)
+ThemeObjects.PlayerTP.PlayersTab.Position = UDim2.new(0.5, -82, 0, 28)
+ThemeObjects.PlayerTP.PlayersTab.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+ThemeObjects.PlayerTP.PlayersTab.BackgroundTransparency = 0.45
+ThemeObjects.PlayerTP.PlayersTab.BorderSizePixel = 0
+ThemeObjects.PlayerTP.PlayersTab.Text = "Players"
+ThemeObjects.PlayerTP.PlayersTab.Font = Enum.Font.GothamBold
+ThemeObjects.PlayerTP.PlayersTab.TextSize = 10
+ThemeObjects.PlayerTP.PlayersTab.Parent = ThemeObjects.PlayerTP.Frame
+table.insert(ThemeObjects.Texts, ThemeObjects.PlayerTP.PlayersTab)
+Instance.new("UICorner", ThemeObjects.PlayerTP.PlayersTab).CornerRadius = UDim.new(0, 4)
+
+ThemeObjects.PlayerTP.WaypointsTab = Instance.new("TextButton")
+ThemeObjects.PlayerTP.WaypointsTab.Size = UDim2.new(0, 80, 0, 20)
+ThemeObjects.PlayerTP.WaypointsTab.Position = UDim2.new(0.5, 2, 0, 28)
+ThemeObjects.PlayerTP.WaypointsTab.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+ThemeObjects.PlayerTP.WaypointsTab.BackgroundTransparency = 0.45
+ThemeObjects.PlayerTP.WaypointsTab.BorderSizePixel = 0
+ThemeObjects.PlayerTP.WaypointsTab.Text = "Waypoints"
+ThemeObjects.PlayerTP.WaypointsTab.Font = Enum.Font.GothamBold
+ThemeObjects.PlayerTP.WaypointsTab.TextSize = 10
+ThemeObjects.PlayerTP.WaypointsTab.Parent = ThemeObjects.PlayerTP.Frame
+table.insert(ThemeObjects.Texts, ThemeObjects.PlayerTP.WaypointsTab)
+Instance.new("UICorner", ThemeObjects.PlayerTP.WaypointsTab).CornerRadius = UDim.new(0, 4)
+
+ThemeObjects.PlayerTP.Search = Instance.new("TextBox")
+ThemeObjects.PlayerTP.Search.Size = UDim2.new(1, -16, 0, 20)
+ThemeObjects.PlayerTP.Search.Position = UDim2.new(0, 8, 0, 52)
+ThemeObjects.PlayerTP.Search.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+ThemeObjects.PlayerTP.Search.BackgroundTransparency = 0.8
+ThemeObjects.PlayerTP.Search.BorderSizePixel = 0
+ThemeObjects.PlayerTP.Search.PlaceholderText = "Search Player Name..."
+ThemeObjects.PlayerTP.Search.Text = ""
+ThemeObjects.PlayerTP.Search.Font = Enum.Font.GothamMedium
+ThemeObjects.PlayerTP.Search.TextSize = 11
+ThemeObjects.PlayerTP.Search.Parent = ThemeObjects.PlayerTP.Frame
+table.insert(ThemeObjects.Backgrounds, ThemeObjects.PlayerTP.Search)
+table.insert(ThemeObjects.Texts, ThemeObjects.PlayerTP.Search)
+Instance.new("UICorner", ThemeObjects.PlayerTP.Search).CornerRadius = UDim.new(0, 4)
+
+ThemeObjects.PlayerTP.Scroll = Instance.new("ScrollingFrame")
+ThemeObjects.PlayerTP.Scroll.Size = UDim2.new(1, -16, 1, -80)
+ThemeObjects.PlayerTP.Scroll.Position = UDim2.new(0, 8, 0, 76)
+ThemeObjects.PlayerTP.Scroll.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+ThemeObjects.PlayerTP.Scroll.BackgroundTransparency = 0.8
+ThemeObjects.PlayerTP.Scroll.BorderSizePixel = 0
+ThemeObjects.PlayerTP.Scroll.ScrollBarThickness = 2
+ThemeObjects.PlayerTP.Scroll.ElasticBehavior = Enum.ElasticBehavior.Never
+ThemeObjects.PlayerTP.Scroll.Parent = ThemeObjects.PlayerTP.Frame
+table.insert(ThemeObjects.Backgrounds, ThemeObjects.PlayerTP.Scroll)
+Instance.new("UICorner", ThemeObjects.PlayerTP.Scroll).CornerRadius = UDim.new(0, 6)
+
+ThemeObjects.PlayerTP.Layout = Instance.new("UIListLayout")
+ThemeObjects.PlayerTP.Layout.Padding = UDim.new(0, 2)
+ThemeObjects.PlayerTP.Layout.SortOrder = Enum.SortOrder.LayoutOrder
+ThemeObjects.PlayerTP.Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+ThemeObjects.PlayerTP.Layout.Parent = ThemeObjects.PlayerTP.Scroll
+do
+	local padding = Instance.new("UIPadding")
+	padding.PaddingLeft = UDim.new(0, 2)
+	padding.PaddingRight = UDim.new(0, 2)
+	padding.PaddingTop = UDim.new(0, 1)
+	padding.PaddingBottom = UDim.new(0, 1)
+	padding.Parent = ThemeObjects.PlayerTP.Scroll
+end
+
+ThemeObjects.PlayerTP.WaypointSearch = Instance.new("TextBox")
+ThemeObjects.PlayerTP.WaypointSearch.Size = ThemeObjects.PlayerTP.Search.Size
+ThemeObjects.PlayerTP.WaypointSearch.Position = ThemeObjects.PlayerTP.Search.Position
+ThemeObjects.PlayerTP.WaypointSearch.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+ThemeObjects.PlayerTP.WaypointSearch.BackgroundTransparency = 0.8
+ThemeObjects.PlayerTP.WaypointSearch.BorderSizePixel = 0
+ThemeObjects.PlayerTP.WaypointSearch.PlaceholderText = "Search Waypoints..."
+ThemeObjects.PlayerTP.WaypointSearch.Text = ""
+ThemeObjects.PlayerTP.WaypointSearch.Font = Enum.Font.GothamMedium
+ThemeObjects.PlayerTP.WaypointSearch.TextSize = 11
+ThemeObjects.PlayerTP.WaypointSearch.Visible = false
+ThemeObjects.PlayerTP.WaypointSearch.Parent = ThemeObjects.PlayerTP.Frame
+table.insert(ThemeObjects.Backgrounds, ThemeObjects.PlayerTP.WaypointSearch)
+table.insert(ThemeObjects.Texts, ThemeObjects.PlayerTP.WaypointSearch)
+Instance.new("UICorner", ThemeObjects.PlayerTP.WaypointSearch).CornerRadius = UDim.new(0, 4)
+
+ThemeObjects.PlayerTP.WaypointScroll = Instance.new("ScrollingFrame")
+ThemeObjects.PlayerTP.WaypointScroll.Size = ThemeObjects.PlayerTP.Scroll.Size
+ThemeObjects.PlayerTP.WaypointScroll.Position = ThemeObjects.PlayerTP.Scroll.Position
+ThemeObjects.PlayerTP.WaypointScroll.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+ThemeObjects.PlayerTP.WaypointScroll.BackgroundTransparency = 0.8
+ThemeObjects.PlayerTP.WaypointScroll.BorderSizePixel = 0
+ThemeObjects.PlayerTP.WaypointScroll.ScrollBarThickness = 2
+ThemeObjects.PlayerTP.WaypointScroll.ElasticBehavior = Enum.ElasticBehavior.Never
+ThemeObjects.PlayerTP.WaypointScroll.Visible = false
+ThemeObjects.PlayerTP.WaypointScroll.Parent = ThemeObjects.PlayerTP.Frame
+table.insert(ThemeObjects.Backgrounds, ThemeObjects.PlayerTP.WaypointScroll)
+Instance.new("UICorner", ThemeObjects.PlayerTP.WaypointScroll).CornerRadius = UDim.new(0, 6)
+
+ThemeObjects.PlayerTP.WaypointLayout = Instance.new("UIListLayout")
+ThemeObjects.PlayerTP.WaypointLayout.Padding = UDim.new(0, 2)
+ThemeObjects.PlayerTP.WaypointLayout.SortOrder = Enum.SortOrder.LayoutOrder
+ThemeObjects.PlayerTP.WaypointLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+ThemeObjects.PlayerTP.WaypointLayout.Parent = ThemeObjects.PlayerTP.WaypointScroll
+do
+	local padding = Instance.new("UIPadding")
+	padding.PaddingLeft = UDim.new(0, 2)
+	padding.PaddingRight = UDim.new(0, 2)
+	padding.PaddingTop = UDim.new(0, 1)
+	padding.PaddingBottom = UDim.new(0, 1)
+	padding.Parent = ThemeObjects.PlayerTP.WaypointScroll
+end
+
+ThemeObjects.PlayerTP.Refresh = function()
+	for _, child in ipairs(ThemeObjects.PlayerTP.Scroll:GetChildren()) do
+		if child:IsA("Frame") then child:Destroy() end
+	end
+	local filter = ThemeObjects.PlayerTP.Search.Text:lower()
+	for _, targetPlayer in ipairs(Players:GetPlayers()) do
+		if targetPlayer ~= Player then
+			local displayText = targetPlayer.DisplayName or targetPlayer.Name
+			if filter == "" or displayText:lower():find(filter, 1, true) or targetPlayer.Name:lower():find(filter, 1, true) then
+				local targetRow = Instance.new("Frame")
+				targetRow.Name = "PlayerTPRow"
+				targetRow.Size = UDim2.new(1, 0, 0, 30)
+				targetRow.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+				targetRow.BackgroundTransparency = 0.8
+				targetRow.BorderSizePixel = 0
+				targetRow.Parent = ThemeObjects.PlayerTP.Scroll
+				Instance.new("UICorner", targetRow).CornerRadius = UDim.new(0, 4)
+
+				local displayLabel = Instance.new("TextLabel")
+				displayLabel.Size = UDim2.new(1, -12, 0, 16)
+				displayLabel.Position = UDim2.new(0, 7, 0, 1)
+				displayLabel.BackgroundTransparency = 1
+				displayLabel.Text = displayText
+				displayLabel.Font = Enum.Font.GothamBold
+				displayLabel.TextSize = 10
+				displayLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+				displayLabel.TextXAlignment = Enum.TextXAlignment.Left
+				displayLabel.Parent = targetRow
+
+				local usernameLabel = Instance.new("TextLabel")
+				usernameLabel.Size = UDim2.new(1, -12, 0, 11)
+				usernameLabel.Position = UDim2.new(0, 7, 0, 16)
+				usernameLabel.BackgroundTransparency = 1
+				usernameLabel.Text = "@" .. targetPlayer.Name
+				usernameLabel.Font = Enum.Font.GothamMedium
+				usernameLabel.TextSize = 8
+				usernameLabel.TextColor3 = InactiveTextColor()
+				usernameLabel.TextXAlignment = Enum.TextXAlignment.Left
+				usernameLabel.Parent = targetRow
+
+				local targetButton = Instance.new("TextButton")
+				targetButton.Size = UDim2.new(1, 0, 1, 0)
+				targetButton.BackgroundTransparency = 1
+				targetButton.Text = ""
+				targetButton.Parent = targetRow
+				targetButton.MouseButton1Click:Connect(function()
+					PlayClick()
+					local targetCharacter = targetPlayer.Character
+					local targetRoot = targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart")
+					local character = Player.Character
+					local root = character and character:FindFirstChild("HumanoidRootPart")
+					if targetRoot and root then root.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 3) end
+				end)
+			end
+		end
+	end
+	ThemeObjects.PlayerTP.Scroll.CanvasSize = UDim2.new(0, 0, 0, ThemeObjects.PlayerTP.Layout.AbsoluteContentSize.Y + 2)
+end
+
+ThemeObjects.PlayerTP.ShowTab = function(tabName)
+	ThemeObjects.PlayerTP.ActiveTab = tabName == "Waypoints" and "Waypoints" or "Players"
+	local showingWaypoints = ThemeObjects.PlayerTP.ActiveTab == "Waypoints"
+	ThemeObjects.PlayerTP.Search.Visible = not showingWaypoints
+	ThemeObjects.PlayerTP.Scroll.Visible = not showingWaypoints
+	ThemeObjects.PlayerTP.WaypointSearch.Visible = showingWaypoints
+	ThemeObjects.PlayerTP.WaypointScroll.Visible = showingWaypoints
+	ThemeObjects.PlayerTP.PlayersTab.BackgroundTransparency = showingWaypoints and 0.55 or 0.18
+	ThemeObjects.PlayerTP.WaypointsTab.BackgroundTransparency = showingWaypoints and 0.18 or 0.55
+	ThemeObjects.PlayerTP.PlayersTab.TextColor3 = showingWaypoints and InactiveTextColor() or Color3.fromRGB(255, 255, 255)
+	ThemeObjects.PlayerTP.WaypointsTab.TextColor3 = showingWaypoints and Color3.fromRGB(255, 255, 255) or InactiveTextColor()
+	if showingWaypoints and ThemeObjects.PlayerTP.RefreshWaypoints then ThemeObjects.PlayerTP.RefreshWaypoints()
+	else ThemeObjects.PlayerTP.Refresh() end
+end
+
+ThemeObjects.PlayerTP.Toggle = function()
+	PlaySwoosh()
+	if not ThemeObjects.PlayerTP.Frame.Visible then ThemeObjects.PlayerTP.ShowTab(ThemeObjects.PlayerTP.ActiveTab or "Players") end
+	ThemeObjects.PlayerTP.Frame.Visible = not ThemeObjects.PlayerTP.Frame.Visible
+end
+
+ThemeObjects.PlayerTP.Search:GetPropertyChangedSignal("Text"):Connect(ThemeObjects.PlayerTP.Refresh)
+ThemeObjects.PlayerTP.WaypointSearch:GetPropertyChangedSignal("Text"):Connect(function()
+	if ThemeObjects.PlayerTP.RefreshWaypoints then ThemeObjects.PlayerTP.RefreshWaypoints() end
+end)
+ThemeObjects.PlayerTP.PlayersTab.MouseButton1Click:Connect(function() PlayClick() ThemeObjects.PlayerTP.ShowTab("Players") end)
+ThemeObjects.PlayerTP.WaypointsTab.MouseButton1Click:Connect(function() PlayClick() ThemeObjects.PlayerTP.ShowTab("Waypoints") end)
+Players.PlayerAdded:Connect(ThemeObjects.PlayerTP.Refresh)
+Players.PlayerRemoving:Connect(ThemeObjects.PlayerTP.Refresh)
+ThemeObjects.PlayerTP.Close.MouseButton1Click:Connect(function() PlaySwoosh() ThemeObjects.PlayerTP.Frame.Visible = false end)
+
+ThemeObjects.PlayerTP.Header.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		ThemeObjects.PlayerTP.Dragging = true
+		ThemeObjects.PlayerTP.DragStart = input.Position
+		ThemeObjects.PlayerTP.StartPosition = ThemeObjects.PlayerTP.Frame.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then ThemeObjects.PlayerTP.Dragging = false end
+		end)
+	end
+end)
+UserInputService.InputChanged:Connect(function(input)
+	if ThemeObjects.PlayerTP.Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+		local delta = input.Position - ThemeObjects.PlayerTP.DragStart
+		ThemeObjects.PlayerTP.Frame.Position = UDim2.new(ThemeObjects.PlayerTP.StartPosition.X.Scale, ThemeObjects.PlayerTP.StartPosition.X.Offset + delta.X, ThemeObjects.PlayerTP.StartPosition.Y.Scale, ThemeObjects.PlayerTP.StartPosition.Y.Offset + delta.Y)
+	end
+end)
+
+
 FlingBindBtn.MouseButton1Click:Connect(function()
 	PlayClick()
 	IsBindingFlingMenu = true
@@ -2644,11 +2914,9 @@ PlayerSearch.BackgroundColor3 = Color3.fromRGB(38, 38, 52)
 PlayerSearch.BackgroundTransparency = 0.8
 PlayerSearch.BorderSizePixel = 0
 PlayerSearch.PlaceholderText = "Search players..."
-PlayerSearch.PlaceholderColor3 = Color3.fromRGB(255, 255, 255)
 PlayerSearch.Text = ""
 PlayerSearch.Font = Enum.Font.GothamMedium
 PlayerSearch.TextSize = 11
-PlayerSearch.TextColor3 = Color3.fromRGB(255, 255, 255)
 PlayerSearch.Parent = TeleportPage
 table.insert(ThemeObjects.Backgrounds, PlayerSearch)
 table.insert(ThemeObjects.Texts, PlayerSearch)
@@ -2672,6 +2940,63 @@ ThemeObjects.WaypointToggleButton.Parent = TeleportPage
 table.insert(ThemeObjects.Backgrounds, ThemeObjects.WaypointToggleButton)
 table.insert(ThemeObjects.Texts, ThemeObjects.WaypointToggleButton)
 Instance.new("UICorner", ThemeObjects.WaypointToggleButton).CornerRadius = UDim.new(0, 5)
+
+ThemeObjects.PlayerTP.OpenButton = Instance.new("TextButton")
+ThemeObjects.PlayerTP.OpenButton.Name = "PlayerTPMenuButton"
+ThemeObjects.PlayerTP.OpenButton.Size = UDim2.new(0, 68, 0, 28)
+ThemeObjects.PlayerTP.OpenButton.Position = UDim2.new(1, -240, 0, 4)
+ThemeObjects.PlayerTP.OpenButton.BackgroundColor3 = Color3.fromRGB(38, 38, 52)
+ThemeObjects.PlayerTP.OpenButton.BackgroundTransparency = 0.8
+ThemeObjects.PlayerTP.OpenButton.BorderSizePixel = 0
+ThemeObjects.PlayerTP.OpenButton.Text = "TP Menu"
+ThemeObjects.PlayerTP.OpenButton.Font = Enum.Font.GothamBold
+ThemeObjects.PlayerTP.OpenButton.TextSize = 10
+ThemeObjects.PlayerTP.OpenButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ThemeObjects.PlayerTP.OpenButton.Parent = TeleportPage
+table.insert(ThemeObjects.Backgrounds, ThemeObjects.PlayerTP.OpenButton)
+table.insert(ThemeObjects.Texts, ThemeObjects.PlayerTP.OpenButton)
+Instance.new("UICorner", ThemeObjects.PlayerTP.OpenButton).CornerRadius = UDim.new(0, 5)
+
+ThemeObjects.PlayerTP.BindButton = Instance.new("TextButton")
+ThemeObjects.PlayerTP.BindButton.Name = "PlayerTPBindButton"
+ThemeObjects.PlayerTP.BindButton.Size = UDim2.new(0, 68, 0, 28)
+ThemeObjects.PlayerTP.BindButton.Position = UDim2.new(1, -168, 0, 4)
+ThemeObjects.PlayerTP.BindButton.BackgroundColor3 = Color3.fromRGB(38, 38, 52)
+ThemeObjects.PlayerTP.BindButton.BackgroundTransparency = 0.8
+ThemeObjects.PlayerTP.BindButton.BorderSizePixel = 0
+ThemeObjects.PlayerTP.BindButton.Text = KeybindText(ThemeObjects.PlayerTP.Keybind)
+ThemeObjects.PlayerTP.BindButton.Font = Enum.Font.GothamBold
+ThemeObjects.PlayerTP.BindButton.TextSize = 9
+ThemeObjects.PlayerTP.BindButton.TextColor3 = AccentColor
+ThemeObjects.PlayerTP.BindButton.Parent = TeleportPage
+table.insert(ThemeObjects.Backgrounds, ThemeObjects.PlayerTP.BindButton)
+table.insert(ThemeObjects.Accents, ThemeObjects.PlayerTP.BindButton)
+Instance.new("UICorner", ThemeObjects.PlayerTP.BindButton).CornerRadius = UDim.new(0, 5)
+
+ThemeObjects.PlayerTP.OpenButton.MouseButton1Click:Connect(function()
+	PlayClick()
+	ThemeObjects.PlayerTP.Toggle()
+end)
+ThemeObjects.PlayerTP.BindButton.MouseButton1Click:Connect(function()
+	PlayClick()
+	ThemeObjects.PlayerTP.Binding = true
+	ThemeObjects.PlayerTP.BindButton.Text = "..."
+	ThemeObjects.PlayerTP.BindConnection = UserInputService.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.Keyboard then
+			local selectedKey = input.KeyCode
+			if selectedKey == Enum.KeyCode.Backspace or selectedKey == Enum.KeyCode.Delete then
+				selectedKey = Enum.KeyCode.Unknown
+			end
+			ThemeObjects.PlayerTP.Keybind = selectedKey
+			SaveKeybind("PlayerTPMenu", selectedKey)
+			ThemeObjects.PlayerTP.BindButton.Text = KeybindText(selectedKey)
+			ThemeObjects.PlayerTP.Binding = false
+			if ThemeObjects.PlayerTP.BindConnection then ThemeObjects.PlayerTP.BindConnection:Disconnect() end
+			ThemeObjects.PlayerTP.BindConnection = nil
+		end
+	end)
+end)
+
 
 local PlayerScroll = Instance.new("ScrollingFrame")
 PlayerScroll.Name = "PlayerScroll"
@@ -2847,10 +3172,11 @@ function ThemeObjects.WaypointUI.Refresh()
 		waypointButton.Font = Enum.Font.GothamBold
 		waypointButton.TextSize = 10
 		waypointButton.TextTruncate = Enum.TextTruncate.AtEnd
-		waypointButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		waypointButton.TextColor3 = AccentColor
 		waypointButton.TextXAlignment = Enum.TextXAlignment.Left
 		waypointButton.Parent = waypointRow
 		table.insert(ThemeObjects.Backgrounds, waypointButton)
+		table.insert(ThemeObjects.Accents, waypointButton)
 		Instance.new("UICorner", waypointButton).CornerRadius = UDim.new(0, 4)
 
 		local editButton = Instance.new("TextButton")
@@ -2899,13 +3225,13 @@ function ThemeObjects.WaypointUI.Refresh()
 			editBox.BorderSizePixel = 0
 			editBox.Text = waypoint.Name or "Waypoint"
 			editBox.PlaceholderText = "Waypoint name..."
-			editBox.PlaceholderColor3 = Color3.fromRGB(255, 255, 255)
+			editBox.PlaceholderColor3 = InactiveTextColor()
 			editBox.ClearTextOnFocus = false
 			editBox.Font = waypointButton.Font
 			editBox.TextSize = waypointButton.TextSize
 			editBox.TextXAlignment = Enum.TextXAlignment.Center
 			editBox.TextWrapped = false
-			editBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+			editBox.TextColor3 = AccentColor
 			editBox.Parent = waypointRow
 			table.insert(ThemeObjects.Accents, editBox)
 			Instance.new("UICorner", editBox).CornerRadius = UDim.new(0, 4)
@@ -2925,8 +3251,129 @@ function ThemeObjects.WaypointUI.Refresh()
 		end)
 	end
 	ThemeObjects.WaypointUI.List.CanvasSize = UDim2.new(0, 0, 0, ThemeObjects.WaypointUI.Layout.AbsoluteContentSize.Y + 8)
+	if ThemeObjects.PlayerTP and ThemeObjects.PlayerTP.RefreshWaypoints then ThemeObjects.PlayerTP.RefreshWaypoints() end
 	UpdateTheme(true)
 end
+
+ThemeObjects.PlayerTP.RefreshWaypoints = function()
+	for _, child in ipairs(ThemeObjects.PlayerTP.WaypointScroll:GetChildren()) do
+		if child:IsA("Frame") then child:Destroy() end
+	end
+	local filter = ThemeObjects.PlayerTP.WaypointSearch.Text:lower()
+	for index, waypoint in ipairs(ThemeObjects.WaypointUI.Waypoints) do
+		local waypointName = waypoint.Name or "Waypoint"
+		if filter == "" or waypointName:lower():find(filter, 1, true) then
+			local waypointRow = Instance.new("Frame")
+			waypointRow.Name = "PlayerTPWaypointRow"
+			waypointRow.Size = UDim2.new(1, 0, 0, 30)
+			waypointRow.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+			waypointRow.BackgroundTransparency = 0.8
+			waypointRow.BorderSizePixel = 0
+			waypointRow.Parent = ThemeObjects.PlayerTP.WaypointScroll
+			Instance.new("UICorner", waypointRow).CornerRadius = UDim.new(0, 4)
+
+			local nameLabel = Instance.new("TextLabel")
+			nameLabel.Size = UDim2.new(1, -58, 0, 16)
+			nameLabel.Position = UDim2.new(0, 7, 0, 1)
+			nameLabel.BackgroundTransparency = 1
+			nameLabel.Text = waypointName
+			nameLabel.Font = Enum.Font.GothamBold
+			nameLabel.TextSize = 10
+			nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+			nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+			nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
+			nameLabel.Parent = waypointRow
+
+			local typeLabel = Instance.new("TextLabel")
+			typeLabel.Size = UDim2.new(1, -58, 0, 11)
+			typeLabel.Position = UDim2.new(0, 7, 0, 16)
+			typeLabel.BackgroundTransparency = 1
+			typeLabel.Text = waypoint.Kind == "Position" and "Saved position" or "Saved part"
+			typeLabel.Font = Enum.Font.GothamMedium
+			typeLabel.TextSize = 8
+			typeLabel.TextColor3 = InactiveTextColor()
+			typeLabel.TextXAlignment = Enum.TextXAlignment.Left
+			typeLabel.Parent = waypointRow
+
+			local deleteButton = Instance.new("TextButton")
+			deleteButton.Size = UDim2.new(0, 22, 0, 22)
+			deleteButton.Position = UDim2.new(1, -26, 0.5, -11)
+			deleteButton.BackgroundColor3 = Color3.fromRGB(120, 40, 40)
+			deleteButton.BackgroundTransparency = 0.25
+			deleteButton.BorderSizePixel = 0
+			deleteButton.Text = "×"
+			deleteButton.Font = Enum.Font.GothamBold
+			deleteButton.TextSize = 11
+			deleteButton.TextColor3 = Color3.fromRGB(255, 190, 190)
+			deleteButton.Parent = waypointRow
+			Instance.new("UICorner", deleteButton).CornerRadius = UDim.new(0, 4)
+
+			local editButton = Instance.new("TextButton")
+			editButton.Size = UDim2.new(0, 28, 0, 22)
+			editButton.Position = UDim2.new(1, -58, 0.5, -11)
+			editButton.BackgroundColor3 = AccentColor
+			editButton.BackgroundTransparency = 0.25
+			editButton.BorderSizePixel = 0
+			editButton.Text = "Edit"
+			editButton.Font = Enum.Font.GothamBold
+			editButton.TextSize = 8
+			editButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+			editButton.Parent = waypointRow
+			table.insert(ThemeObjects.AccentBackgrounds, editButton)
+			Instance.new("UICorner", editButton).CornerRadius = UDim.new(0, 4)
+
+			local clickButton = Instance.new("TextButton")
+			clickButton.Size = UDim2.new(1, -62, 1, 0)
+			clickButton.BackgroundTransparency = 1
+			clickButton.Text = ""
+			clickButton.Parent = waypointRow
+			clickButton.MouseButton1Click:Connect(function()
+				PlayClick()
+				local waypointCFrame = ThemeObjects.WaypointUI.GetCFrame(waypoint)
+				local character = Player.Character
+				local root = character and character:FindFirstChild("HumanoidRootPart")
+				if waypointCFrame and root then
+					root.CFrame = waypoint.Kind == "Position" and waypointCFrame or waypointCFrame * CFrame.new(0, 3, 0)
+				end
+			end)
+			editButton.MouseButton1Click:Connect(function()
+				PlayClick()
+				nameLabel.Visible = false
+				typeLabel.Visible = false
+				editButton.Visible = false
+				clickButton.Visible = false
+				local editBox = Instance.new("TextBox")
+				editBox.Size = UDim2.new(1, -64, 1, -6)
+				editBox.Position = UDim2.new(0, 6, 0, 3)
+				editBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+				editBox.BackgroundTransparency = 0.25
+				editBox.BorderSizePixel = 0
+				editBox.Text = waypointName
+				editBox.ClearTextOnFocus = false
+				editBox.Font = Enum.Font.GothamBold
+				editBox.TextSize = 10
+				editBox.TextColor3 = AccentColor
+				editBox.Parent = waypointRow
+				Instance.new("UICorner", editBox).CornerRadius = UDim.new(0, 4)
+				editBox.FocusLost:Connect(function()
+					local newName = editBox.Text:match("^%s*(.-)%s*$")
+					if newName and newName ~= "" then waypoint.Name = string.sub(newName, 1, 32) end
+					ThemeObjects.WaypointUI.Save()
+					ThemeObjects.WaypointUI.Refresh()
+				end)
+				task.defer(function() editBox:CaptureFocus() end)
+			end)
+			deleteButton.MouseButton1Click:Connect(function()
+				PlayClick()
+				table.remove(ThemeObjects.WaypointUI.Waypoints, index)
+				ThemeObjects.WaypointUI.Save()
+				ThemeObjects.WaypointUI.Refresh()
+			end)
+		end
+	end
+	ThemeObjects.PlayerTP.WaypointScroll.CanvasSize = UDim2.new(0, 0, 0, ThemeObjects.PlayerTP.WaypointLayout.AbsoluteContentSize.Y + 2)
+end
+
 
 ThemeObjects.ExtrasFeature.AddWaypoint = function(part)
 	if not part or not part:IsA("BasePart") then return end
@@ -3004,9 +3451,10 @@ local function UpdatePlayerList()
 		pName.Text = p.DisplayName or p.Name
 		pName.Font = Enum.Font.GothamMedium
 		pName.TextSize = 11
-		pName.TextColor3 = Color3.fromRGB(255, 255, 255)
+		pName.TextColor3 = Color3.fromRGB(200, 200, 215)
 		pName.TextXAlignment = Enum.TextXAlignment.Left
 		pName.Parent = pFrame
+		table.insert(ThemeObjects.Texts, pName)
 
 		local tpBtn = Instance.new("TextButton")
 		tpBtn.Size = UDim2.new(0, 42, 0, 22)
@@ -4724,7 +5172,7 @@ MiniButton.MouseButton1Click:Connect(ToggleGUI)
 
 -- Input Listener
 Connections.InputBegan = UserInputService.InputBegan:Connect(function(input, processed)
-	if processed or IsBindingSpeed or IsBindingFly or IsBindingNoclip or ThemeObjects.FreeCam.Binding or IsBindingAutoLock or IsBindingESP or IsBindingFlingMenu then return end
+	if processed or IsBindingSpeed or IsBindingFly or IsBindingNoclip or ThemeObjects.FreeCam.Binding or IsBindingAutoLock or IsBindingESP or IsBindingFlingMenu or ThemeObjects.PlayerTP.Binding then return end
 	if input.UserInputType ~= Enum.UserInputType.Keyboard then return end
 	if input.KeyCode == SpeedKeybind then ToggleSpeed()
 	elseif input.KeyCode == FlyKeybind then ToggleFly()
@@ -4733,6 +5181,7 @@ Connections.InputBegan = UserInputService.InputBegan:Connect(function(input, pro
 	elseif input.KeyCode == AutoLockKeybind then ToggleAutoLock()
     elseif input.KeyCode == ESPKeybind then ToggleESP()
 	elseif input.KeyCode == FlingMenuKeybind then ToggleFlingMenu()
+	elseif input.KeyCode == ThemeObjects.PlayerTP.Keybind then ThemeObjects.PlayerTP.Toggle()
     elseif input.KeyCode == Enum.KeyCode.LeftControl then ToggleGUI() 
     end
 end)
@@ -5141,7 +5590,7 @@ local function ApplyGuiSize(value)
 	GuiSizeValue = math.clamp(value, 20, 100)
 	GuiSizeValueLabel.Text = tostring(GuiSizeValue)
 	local targetScale = GuiScaleFromValue(GuiSizeValue)
-	for _, scaleObject in ipairs({MainScaleObject, TargetScaleObject, SplashScaleObject, ThemeObjects.PickerDockScale, ThemeObjects.GuiSizeDockScale, ThemeObjects.ExtrasFeature.CopyScale}) do
+	for _, scaleObject in ipairs({MainScaleObject, TargetScaleObject, ThemeObjects.PlayerTP.Scale, SplashScaleObject, ThemeObjects.PickerDockScale, ThemeObjects.GuiSizeDockScale, ThemeObjects.ExtrasFeature.CopyScale}) do
 		if scaleObject and scaleObject.Parent then
 			TweenService:Create(scaleObject, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Scale = targetScale}):Play()
 		end
@@ -5454,6 +5903,7 @@ ConfirmYesBtn.MouseButton1Click:Connect(function()
 	AutoLockKeybind = Enum.KeyCode.Unknown
 	ESPKeybind = Enum.KeyCode.Unknown
 	FlingMenuKeybind = Enum.KeyCode.Unknown
+	ThemeObjects.PlayerTP.Keybind = Enum.KeyCode.Unknown
 	SavedKeybinds.Speed = "Unknown"
 	SavedKeybinds.Fly = "Unknown"
 	SavedKeybinds.Noclip = "Unknown"
@@ -5461,6 +5911,7 @@ ConfirmYesBtn.MouseButton1Click:Connect(function()
 	SavedKeybinds.AutoLock = "Unknown"
 	SavedKeybinds.ESP = "Unknown"
 	SavedKeybinds.FlingMenu = "Unknown"
+	SavedKeybinds.PlayerTPMenu = "Unknown"
 	SpeedBindBtn.Text = "..."
 	FlyBindBtn.Text = "..."
 	NoclipBindBtn.Text = "..."
@@ -5468,6 +5919,7 @@ ConfirmYesBtn.MouseButton1Click:Connect(function()
 	AutoLockBindBtn.Text = "..."
 	ESPBindBtn.Text = "..."
 	FlingBindBtn.Text = "..."
+	if ThemeObjects.PlayerTP.BindButton then ThemeObjects.PlayerTP.BindButton.Text = "..." end
 	SavePersistentSettings()
 	ConfirmClearFrame.Visible = false
 end)
