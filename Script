@@ -2772,6 +2772,9 @@ do
 end
 
 ThemeObjects.PlayerTP.Refresh = function()
+	if not (ThemeObjects.PlayerTP and ThemeObjects.PlayerTP.Scroll and ThemeObjects.PlayerTP.Search and ThemeObjects.PlayerTP.Layout) then
+		return
+	end
 	for _, child in ipairs(ThemeObjects.PlayerTP.Scroll:GetChildren()) do
 		if child:IsA("Frame") then child:Destroy() end
 	end
@@ -3174,6 +3177,9 @@ function ThemeObjects.WaypointUI.Save()
 end
 
 function ThemeObjects.WaypointUI.Refresh()
+	if not (ThemeObjects.WaypointUI and ThemeObjects.WaypointUI.List and ThemeObjects.WaypointUI.Layout and ThemeObjects.WaypointUI.Waypoints) then
+		return
+	end
 	for _, child in ipairs(ThemeObjects.WaypointUI.List:GetChildren()) do
 		if child:IsA("Frame") then child:Destroy() end
 	end
